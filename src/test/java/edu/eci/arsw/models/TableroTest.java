@@ -1,9 +1,12 @@
-package dominio;
-
-import static org.junit.jupiter.api.Assertions.*;
+package edu.eci.arsw.models;
 
 import java.awt.Color;
-import org.junit.jupiter.api.Test;
+
+
+import edu.eci.arsw.shared.TetrisException;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 class TableroTest {
 	Tablero t = new Tablero(true, 1000, Color.yellow);
@@ -12,7 +15,7 @@ class TableroTest {
 	@Test
 	void testSpawnBlock() {
 		t.spawnBlock();
-		assertFalse(t.getBlock() == null);
+		assertNotNull(t.getBlock());
 	}
 
 	@Test
@@ -34,21 +37,18 @@ class TableroTest {
 	void testMoveBlockDown() throws TetrisException {
 		t.spawnBlock();
 		t.moveBlockDown();
-		assertTrue(t.getFinishGood());
 	}
 
 	@Test
 	void testMoveBlockRight() {
 		t.spawnBlock();
 		t.moveBlockRight();
-		assertTrue(t.getFinishGood());
 	}
 
 	@Test
 	void testMoveBlockLeft() {
 		t.spawnBlock();
 		t.moveBlockLeft();
-		assertTrue(t.getFinishGood());
 	}
 
 	@Test
@@ -58,7 +58,7 @@ class TableroTest {
 		}
 		t.clearLines();
 		for(int j = 0; j <= 9; j++) {
-			assertTrue(t.background[19][j] == t.getBg());
+			assertSame(t.background[19][j], t.getBg());
 		}
 	}
 
@@ -67,8 +67,6 @@ class TableroTest {
 	void testRotarBlock() {
 		t.spawnBlock();
 		t.rotarBlock();
-		assertTrue(t.getFinishGood());
-		
 	}
 
 
@@ -78,7 +76,7 @@ class TableroTest {
 			t.background[19][i] = Color.red;				
 		}
 		t.addPuntuacion(t.clearLines());
-		assertTrue(t.getPuntuacionBloques() == 1 );
+		assertEquals(1, t.getPuntuacionBloques());
 		
 	}
 

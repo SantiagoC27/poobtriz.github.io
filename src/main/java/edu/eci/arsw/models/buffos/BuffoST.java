@@ -10,7 +10,6 @@ public class BuffoST extends Buffo{
 	public BuffoST(int[] c) {
 		super(c);
 		super.c = Color.yellow;
-		// TODO Auto-generated constructor stub
 	}
 
 	public void activate(final Tablero t) {

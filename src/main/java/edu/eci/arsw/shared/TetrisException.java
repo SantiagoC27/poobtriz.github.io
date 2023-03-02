@@ -1,4 +1,4 @@
-package edu.eci.arsw;
+package edu.eci.arsw.shared;
 
 /**
  * class TetrisException .

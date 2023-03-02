@@ -8,24 +8,24 @@ import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Random;
 
+import edu.eci.arsw.shared.Log;
 import edu.eci.arsw.models.rebordes.Reborde;
-import edu.eci.arsw.Log;
 
 public class BloqueTetris implements Cloneable, Serializable {
 	//C, L, LINE, T, Z
 	public static int[][][] formas ={{{1,1}, {1,1}}, {{1,0}, {1,0}, {1,1}}, {{1,1,1,1}},
 									{{1,1,1}, {0,1,0}}, {{1,1,0}, {0,1,1}} };
 	public static Color[] colores= {Color.yellow, Color.CYAN, Color.blue, Color.pink, Color.ORANGE};
-	private static List<BloqueTetris> bloquesShared = new ArrayList<BloqueTetris>();
+	private final static List<BloqueTetris> bloquesShared = new ArrayList<>();
 	private int[][] shape;
 	
-	private Color color;
+	private final Color color;
 	private int x, y;
 	protected int[][][] rotaciones;
 	private int currentRotation;
 	private Reborde reborde = Reborde.randomReborde();
 	private boolean isMovible = true;
-	private int currentForm;
+	private final int currentForm;
 	
 	
 	public BloqueTetris(int[][] shape, Reborde r, Color c, int cu) {
@@ -43,7 +43,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 	/**
 	 * Se encarga de hacer apareces los bloques por encima del tablero y en el centro
-	 * @param la anchura del tablero
+	 * @param girdWidth anchura del tablero
 	 */
 	public void spawn(int girdWidth) {
 		y = -getHeight();
@@ -120,7 +120,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 */
 	public void rotar() {
 		if(isRotable()) {
-			
 			setShape();
 		}
 	}
@@ -135,9 +134,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 		if(x + next[0].length <= Tablero.cols && y + next.length < Tablero.filas) return true;
 		return false;
 	}
-	
-
-
 	
 	public BloqueTetris Clone(){
 		try {
@@ -177,7 +173,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 	 /**
 	 * Retorna las coordenadas mas cercanas a la ficha o aun bloque de distancia
-	 * @param Arreglo de corrednadas cercanas
+	 * @return Arreglo de corrednadas cercanas
 	 */
 	public int[][] getCoordenadasCercanas() {
 		int[][] posiciones = new int[16][2];
@@ -225,7 +221,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 	 /**
 	 * Toma un bloque del arreglo de bloques
-	 * @param posicion de la cualse quiere tomar
+	 * @param pos de la cualse quiere tomar
 	 * @return el bloque
 	 */
 	public static BloqueTetris getRandomBlock(int pos) {//======>==================================== meter la secuencia q me salio

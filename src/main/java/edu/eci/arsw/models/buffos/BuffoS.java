@@ -11,7 +11,6 @@ public class BuffoS extends Buffo{
 	public BuffoS(int[] c) {
 		super(c);
 		super.c = Color.green;
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override

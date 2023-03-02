@@ -8,20 +8,14 @@ import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.rebordes.Reborde;
 
-public abstract class Player implements KeyListener, Serializable {
-	private String nick;
+public abstract class Player implements Serializable {
+	private final String nick;
 	protected Tablero t;
 	
 	public Player(String name, Tablero t) {
 		this.nick = name;
 		this.t = t;
 	}
-	
-
-	 /**
-	 * Empieza el juego
-	 */
-	public abstract void run();
 
 	public BloqueTetris getBlock() {
 		return t.getBlock();
@@ -59,7 +53,6 @@ public abstract class Player implements KeyListener, Serializable {
 	public int getTiempo() {
 		return t.getTiempo();
 	}
-	public abstract void registrePuntuacion();
 
 	public void end() {
 		t.interrupt();

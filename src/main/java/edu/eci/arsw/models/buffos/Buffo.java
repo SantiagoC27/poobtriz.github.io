@@ -36,7 +36,7 @@ public abstract class Buffo implements Serializable{
 		
 		while(nums.size() != x) {
 			int n =  random.nextInt(buffos.size());
-			if(isValidNum(nums, n)) {
+			if(isValidNum(nums, n)) { 
 				nums.add(n);
 			}
 		}

@@ -1,4 +1,4 @@
-package edu.eci.arsw;
+package edu.eci.arsw.shared;
 
 import java.util.logging.FileHandler;
 import java.util.logging.Level;

@@ -10,8 +10,8 @@ import java.util.TimerTask;
 
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
-import edu.eci.arsw.Log;
-import edu.eci.arsw.TetrisException;
+import edu.eci.arsw.shared.Log;
+import edu.eci.arsw.shared.TetrisException;
 
 public class Tablero extends Thread implements Serializable{
 	public static final int filas = 20;
@@ -24,9 +24,8 @@ public class Tablero extends Thread implements Serializable{
 	public Reborde[][] bgReborde = new Reborde[filas][cols];
 	private int bloquesUsados = 0;
 	private BloqueTetris block = null;
-	private boolean finishGood = false; 
 	private int velocidad;
-	private static int disminucionVel = 100;
+	private static final int disminucionVel = 100;
 	private static boolean uniforme = true;
 
 	private Color bg;
@@ -40,14 +39,6 @@ public class Tablero extends Thread implements Serializable{
 		llenarMatriz();
 	}
 
-		
-	public boolean getFinishGood() {
-		return finishGood;
-	}
-	
-	
-
-
 	/**
 	 * Llena con el color de ltablero todas las casillas
 	 */
@@ -58,28 +49,6 @@ public class Tablero extends Thread implements Serializable{
 				}
 			}
 		
-	}
-
-
-
-	/**
-	 * Empieza el juego :)
-	 */
-	 @Override
-	public void run() {
-		tableros.add(this);
-		setVelYBuffos();
-		while(true) {
-				if(paused) pausarGame();
-				if(block == null) spawnBlock();
-				try {
-					while(moveBlockDown())
-					{
-						Thread.sleep(velocidad);
-					}
-				} catch (Exception e) { Log.registre(e);}
-				if(acaboGame()) break;
-		}
 	}
 
 	/**
@@ -166,7 +135,6 @@ public class Tablero extends Thread implements Serializable{
 	 * @throws TetrisException 
 	 */
 	public boolean moveBlockDown() throws TetrisException {
-		finishGood = false;
 		boolean haBajado = false;
 		
 		if(!paused) {
@@ -182,7 +150,6 @@ public class Tablero extends Thread implements Serializable{
 			pausarGame();
 			haBajado = true;
 		}
-		finishGood = true;
 		return haBajado;
 }
 
@@ -223,7 +190,7 @@ public class Tablero extends Thread implements Serializable{
 	 * Crear el schedule para que se actualice la veolicdad, el tiempo y el buffo cada cierto tiempo
 	 */
 	
-	private void setVelYBuffos() {
+	public void setVelYBuffos() {
 		final Timer timer = new Timer();
 		TimerTask velDown = new TimerTask() {
 			public void run() {
@@ -281,13 +248,11 @@ public class Tablero extends Thread implements Serializable{
 	 * Mueve el bloque a la derecha si es posible
 	 */
 	public void moveBlockRight() {
-		finishGood = false;
 		if(!paused ) {
 			if(!checkRight() || Colision(0,1) == false) return;
 			
 			validateBuffo(1,0);
 			block.moveRight();
-			finishGood = true;
 		}
 
 		
@@ -297,12 +262,10 @@ public class Tablero extends Thread implements Serializable{
 	 * Mueve el bloque a la izquierda si es posible
 	 */
 	public void moveBlockLeft() {
-		finishGood = false;
 		if(!paused) {
 			if(!checkLeft() || Colision(0,-1) == false) return;
 			validateBuffo(-1,0);
 			block.moveLeft();
-			finishGood = true;
 		}
 
 		
@@ -313,7 +276,6 @@ public class Tablero extends Thread implements Serializable{
 	 * Valida si una linea es borrable o no, y en caso de que si la borra
 	 */
 	public int clearLines() {
-			finishGood = false;
 			boolean lineFilled;
 			int linesCleared = 0;
 			for(int r = filas - 1; r >= 0; r--) {
@@ -332,7 +294,6 @@ public class Tablero extends Thread implements Serializable{
 					r++;
 				}
 			}
-			finishGood = true;
 			return linesCleared;
 
 	}
@@ -378,7 +339,6 @@ public class Tablero extends Thread implements Serializable{
 	 * Se encarga de rotar la ficha 
 	 */
 	public void rotarBlock() {
-		finishGood = false;
 		if(!paused) {
 			if(isRotable()) {
 				block.rotar();
@@ -386,7 +346,6 @@ public class Tablero extends Thread implements Serializable{
 			}
 			
 		}
-		finishGood = true;
 	} 
 	/**
 	 * Valida que el tetromino se pueda rotar
@@ -446,7 +405,7 @@ public class Tablero extends Thread implements Serializable{
 	 * Realiza las operaciones pertinentes leugo de que cae el tetromino
 	 * @return si se termino el juego
 	 */
-	private boolean acaboGame() {
+	public boolean acaboGame() {
 		boolean ok = false;
 		try {
 			if(block.modifyShape()) block.findIdealForm(block.traducir(background, bg), background, bg);
@@ -464,8 +423,7 @@ public class Tablero extends Thread implements Serializable{
 	}
 	
 	/** Modifica la velocidad de caida de los bloques si el modo de juego es acelerado
-	 * 
-	 * @param acelerado indica si el modod de juego es acelerado  o no
+	 *
 	 */
 
 	private void alterarVelocidad() {
@@ -569,7 +527,7 @@ public class Tablero extends Thread implements Serializable{
 
 	 /**
 	 * Genera una lista de buffos a usar en base al numero de buffos indicado
-	 * @param numero de buffos
+	 * @param buffs numero de buffos
 	 */
 	public static void prepareBuffos(int buffs) {
 		for(Tablero t :tableros) {
