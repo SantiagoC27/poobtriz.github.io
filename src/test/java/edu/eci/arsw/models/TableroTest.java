@@ -27,9 +27,7 @@ public class TableroTest {
 
 	@Test
 	public void moveBlockDown() throws TetrisException {
-		System.out.println(t.getBlock().getHeight());
 		for (int i = 0; i < filas; i++) {
-			System.out.println(t.getPositionBlock()[1]);
 			assertTrue(t.moveBlockDown());
 		}
 		assertFalse(t.moveBlockDown());
@@ -57,12 +55,25 @@ public class TableroTest {
 
 	@Test
 	public void testClearLines() {
-		for(int i = 0; i <= cols; i++) {
-			t.background[i][cols-1] = Color.red;
+		//Fill two lines completed
+		for(int i = 0; i < cols; i++) {
+			t.background[filas-1][i] = Color.red;
+			t.background[filas-2][i] = Color.red;
+			t.background[filas-3][i] = Color.red;
 		}
+		// Line not completed
+		t.background[filas-3][cols-1] = t.getBg();
+
+
 		t.clearLines();
-		for(int j = 0; j <= cols; j++) {
-			assertEquals(t.background[j][cols-1], t.getBg());
+		for(int j = 0; j < cols; j++) {
+			assertEquals(t.background[filas-2][j], t.getBg());
+			assertEquals(t.background[filas-3][j], t.getBg());
+		}
+
+		//Line doesn't cleared
+		for (int k = 0; k < cols - 1; k++) {
+			assertEquals(t.background[filas-1][k], Color.red);
 		}
 	}
 
@@ -80,7 +91,6 @@ public class TableroTest {
 		}
 		t.addPuntuacion(t.clearLines());
 		assertEquals(1, t.getPuntuacionBloques());
-		
 	}
 
 }

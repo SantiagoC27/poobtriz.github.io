@@ -25,7 +25,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	private int x, y;
 	protected int[][][] rotaciones;
 	private int currentRotation;
-	private Reborde reborde = Reborde.randomReborde();
+	private final Reborde reborde;
 	private boolean isMovible = true;
 	private final int currentForm;
 	
@@ -37,7 +37,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 		this.currentForm = cu;
 		crearRotaciones();
 	}
-	
+
 
 	public int getForm() {
 		return currentForm;
@@ -67,7 +67,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	
 	public void setPos(int X,int Y) {
 		x = X;
-		y = Y;	
+		y = Y;
 	}
 	
 	public int getCurrentRot() {
