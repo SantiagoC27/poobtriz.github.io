@@ -13,7 +13,7 @@ public abstract class Buffo implements Serializable{
 	private int x;
 	private int y;
 	private static List<String> buffos = llenarPosibleBuffos();
-	private static List<String> posiblesBuffos = new ArrayList<String>();
+	private static final List<String> posiblesBuffos = new ArrayList<String>();
 
 	
 	public Buffo(int[] c) {
@@ -25,7 +25,7 @@ public abstract class Buffo implements Serializable{
 
 	 /**
 	 * Crea la lista con los buffos pedidos
-	 * @param numero de buffos
+	 * @param x de buffos
 	 */
 	public static void prepareBuffos(int x) {
 		buffos = llenarPosibleBuffos();
@@ -51,8 +51,8 @@ public abstract class Buffo implements Serializable{
 	
 	 /**
 	 * Valida que un numero este dentro de una lista
-	 * @param lista que contiene los numeros
-	 * @param el numero a buscar
+	 * @param nums que contiene los numeros
+	 * @param n numero a buscar
 	 * @return si esta o no esta
 	 */
 	private static boolean isValidNum(List<Integer> nums, int n) {
@@ -102,36 +102,31 @@ public abstract class Buffo implements Serializable{
 
 	/**
 	 * Selecciona un buffo aleatorio en una lista que los contenga
-	 * @param la lista con los buffos
+	 * @param c lista con los buffos
 	 * @return el buffo aleatorio
 	 */
 	public static Buffo selectRandomBuffo(int[] c) {
+		Buffo b = null;
 		if(posiblesBuffos.size() != 0 && c != null) {
 			Random random = new Random(); 
 			int n =  random.nextInt(posiblesBuffos.size());   
 			String tipo = posiblesBuffos.get(n);
-			Buffo b;
 			switch (tipo.toUpperCase()) {
-			case "S":
-				b = new BuffoS(c);
-				break;
-			case "SD":
-				b = new BuffoSD(c);
-				break;
-			case "ST":
-				b = new BuffoST(c);
-				break;
-			case "X":
-				b = new BuffoX(c);
-				break;
-			default:
-				b = new BuffoS(c);
-				break;
+				case "SD":
+					b = new BuffoSD(c);
+					break;
+				case "ST":
+					b = new BuffoST(c);
+					break;
+				case "X":
+					b = new BuffoX(c);
+					break;
+				default:
+					b = new BuffoS(c);
+					break;
 			}
-			
-			return b;
 		}
-			return null;
+		return b;
 		
 	}
 

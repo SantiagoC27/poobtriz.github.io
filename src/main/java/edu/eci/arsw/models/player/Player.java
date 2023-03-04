@@ -29,10 +29,6 @@ public abstract class Player implements Serializable {
 		return t.getBg();
 	}
 
-	public boolean isAlive() {
-		return t.isAlive();
-	}
-
 	public Reborde getRebordeBg(int r, int c) {
 		return t.bgReborde[r][c];
 	}
@@ -52,11 +48,6 @@ public abstract class Player implements Serializable {
 
 	public int getTiempo() {
 		return t.getTiempo();
-	}
-
-	public void end() {
-		t.interrupt();
-		
 	}
 	
 	public int  getNumBuffs() {

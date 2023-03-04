@@ -12,29 +12,36 @@ import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.Log;
 import edu.eci.arsw.shared.TetrisException;
+import lombok.Getter;
 
-public class Tablero extends Thread implements Serializable{
-	public static final int filas = 20;
-	public static final int cols = 10;
+
+@Getter
+public class Tablero implements Serializable{
+
+	private final int filas;
+	private final int cols;
 	private Buffo buffo;
 	private int numBuffs;
-	public static boolean paused = false;
-	public static List<Tablero> tableros = new ArrayList<Tablero>();
-	public Color[][] background = new Color[filas][cols];
-	public Reborde[][] bgReborde = new Reborde[filas][cols];
+	public static List<Tablero> tableros = new ArrayList<>();
+	public Color[][] background;
+	public Reborde[][] bgReborde;
 	private int bloquesUsados = 0;
 	private BloqueTetris block = null;
 	private int velocidad;
 	private static final int disminucionVel = 100;
 	private static boolean uniforme = true;
 
-	private Color bg;
+	private final Color bg;
 	private int Puntuacion = 0;
 	private int tiempo = 0;
-	public Tablero(boolean uniforme, int vel, Color c) {
+	public Tablero(boolean uniforme, int vel, Color c, int filas, int cols) {
+		this.filas = filas;
+		this.cols = cols;
 		bg = c;
 		Tablero.uniforme = uniforme;
 		velocidad = vel;
+		this.background = new Color[filas][cols];
+		this.bgReborde =  new Reborde[filas][cols];
 		tableros.add(this);
 		llenarMatriz();
 	}
@@ -55,9 +62,9 @@ public class Tablero extends Thread implements Serializable{
 	 * Genera un buffo aleatorio en una coordenada alearotoria
 	 */
 
-	private static void updateBuffo() {
+	private void updateBuffo() {
 		for(Tablero t :Tablero.tableros) {
-			if(!paused) t.buffo = Buffo.selectRandomBuffo(crearCoordenada());
+			t.buffo = Buffo.selectRandomBuffo(crearCoordenada());
 		}
 		
 	}
@@ -67,13 +74,13 @@ public class Tablero extends Thread implements Serializable{
 	 * Genera una coordenada aleatoria para el buffo
 	 * @return La coordenada
 	 */
-	private static int[] crearCoordenada() {
+	private int[] crearCoordenada() {
 		Random random = new Random();
 		int[] coord = new int[2];
-		int n =  random.nextInt(Tablero.filas-1);
+		int n =  random.nextInt(filas-1);
 		if(tableros.size() == 1) {
 			int[] coords =tableros.get(0).getCoordenadasLibres(n);
-			coord[0] = coords[random.nextInt(Tablero.cols-1)];
+			coord[0] = coords[random.nextInt(cols-1)];
 			coord[1] = n;
 		}else {
 			try {
@@ -90,15 +97,7 @@ public class Tablero extends Thread implements Serializable{
 		}
 		return coord;
 	}
-	
-	
-	/**
-	 * Da un buffo aleatorio
-	 * @return el buffo
-	 */
-	public Buffo getBuffo() {
-		return buffo;
-	}
+
 	
 	
 	/**
@@ -106,7 +105,6 @@ public class Tablero extends Thread implements Serializable{
 	 */
 	public void spawnBlock() {
 		block = BloqueTetris.getRandomBlock(bloquesUsados);
-		if(checkFinal() == false) return;
 		block.spawn(cols);
 
 	}
@@ -132,45 +130,18 @@ public class Tablero extends Thread implements Serializable{
 	/**
 	 * Baja el bloque si es posible
 	 * @return si es posible bajar el bloque
-	 * @throws TetrisException 
+	 * @throws TetrisException Si no existe bloque
 	 */
 	public boolean moveBlockDown() throws TetrisException {
-		boolean haBajado = false;
-		
-		if(!paused) {
-			if(block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
-			if(!paused && (checkFinal() == false || Colision(1,0) == false)) haBajado = false;		
-			else {
-				block.moveDown();
-				validateBuffo(0,0);
-				haBajado  = true;	
-			}
-			
-		}else {
-			pausarGame();
-			haBajado = true;
+		boolean haBajado = true;
+		if(block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
+		if(isFinal() || Colision(1,0)) haBajado = false;
+		else {
+			block.moveDown();
+			validateBuffo(0,0);
 		}
 		return haBajado;
 }
-
-
-	
-
-	/**
-	 * Detinene momentaneamente todo el game
-	 */
-	private static void pausarGame() {
-		while(paused) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				Log.registre(e);
-				e.printStackTrace();
-			}
-		}
-
-		
-	}
 
 
 	 /**
@@ -180,14 +151,14 @@ public class Tablero extends Thread implements Serializable{
 	private boolean Colision(int y, int x) {
 		for(int[] c : block.getCoordenadas()) {
 			if(background[c[1]+y][c[0]+x] != bg ) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
-	 * Crear el schedule para que se actualice la veolicdad, el tiempo y el buffo cada cierto tiempo
+	 * Crear el schedule para que se actualice la velocidad, el tiempo y el buffo cada cierto tiempo
 	 */
 	
 	public void setVelYBuffos() {
@@ -198,12 +169,6 @@ public class Tablero extends Thread implements Serializable{
 				alterarVelocidad();
 				updateBuffo();				
 			}
-			if(!paused) tiempo += 1;
-
-			if(!isAlive()) {
-				this.cancel();
-				timer.cancel();
-			}	
 			}
 		};
 		timer.schedule(velDown,1000,1000);
@@ -213,12 +178,8 @@ public class Tablero extends Thread implements Serializable{
 	 * Valida si la figura ya llego al final del tablero
 	 * @return si la figura ya llego al final del tablero
 	 */
-
-	private boolean checkFinal() {
-		if(block.getFinalTablero() == filas) {
-			return false;
-		}
-		return true;	
+	private boolean isFinal() {
+		return block.getY() + block.getHeight() == filas;
 	}
 
 	/**
@@ -227,8 +188,7 @@ public class Tablero extends Thread implements Serializable{
 	 */
 	
 	private boolean checkLeft() {
-		if(block.getLeftEdge() <= 0) return false;
-		return true;
+		return block.getLeftEdge() > 0;
 	}
 	
 
@@ -237,39 +197,36 @@ public class Tablero extends Thread implements Serializable{
 	 * @return si la figura ya llego a la maxima poscicion de la derecha del tablero
 	 */
 	private boolean checkRight() {
-		
-		if(block.getRigthEdge() >= cols) return false;
-		return true;
+		return block.getRigthEdge() < cols;
 	}
-
 
 	
 	/**
 	 * Mueve el bloque a la derecha si es posible
+	 *
 	 */
-	public void moveBlockRight() {
-		if(!paused ) {
-			if(!checkRight() || Colision(0,1) == false) return;
-			
-			validateBuffo(1,0);
-			block.moveRight();
-		}
+	public boolean moveBlockRight() {
+			if(block.getX() + block.getWidth() < cols && !Colision(0,1)){
+				validateBuffo(1,0);
+				block.moveRight();
+				return true;
+			}
+			return false;
 
-		
 	}
 	
 	/**
 	 * Mueve el bloque a la izquierda si es posible
+	 *
 	 */
-	public void moveBlockLeft() {
-		if(!paused) {
-			if(!checkLeft() || Colision(0,-1) == false) return;
-			validateBuffo(-1,0);
-			block.moveLeft();
-		}
+	public boolean moveBlockLeft() {
+			if(block.getX() -1 >= 0 && !Colision(0,-1)){
+				validateBuffo(-1,0);
+				block.moveLeft();
+				return true;
+			}
+			return false;
 
-		
-		
 	}
 	
 	/**
@@ -324,7 +281,7 @@ public class Tablero extends Thread implements Serializable{
 	*/
 	public void moveBlockToBackground() {
 			for(int[] co :block.getCoordenadas()) {
-				if(co[1] < Tablero.filas && co[0]< Tablero.cols) {
+				if(co[1] < filas && co[0]< cols) {
 					background[co[1]][co[0]] = block.getColor();
 					bgReborde[co[1]][co[0]] = block.getReborde();
 				}
@@ -339,13 +296,10 @@ public class Tablero extends Thread implements Serializable{
 	 * Se encarga de rotar la ficha 
 	 */
 	public void rotarBlock() {
-		if(!paused) {
 			if(isRotable()) {
-				block.rotar();
+				block.rotar(this);
 				validateBuffo(0,0);				
 			}
-			
-		}
 	} 
 	/**
 	 * Valida que el tetromino se pueda rotar
@@ -356,7 +310,7 @@ public class Tablero extends Thread implements Serializable{
 		// Traer la siguiente rotacion
 		// ver si no hay cuadros ocupados en el tablero
 		BloqueTetris b = block.Clone();
-		b.rotar();
+		b.rotar(this);
 		int oldPos = b.getY();
 		for(int[] c :b.getCoordenadas()) {
 			
@@ -408,7 +362,7 @@ public class Tablero extends Thread implements Serializable{
 	public boolean acaboGame() {
 		boolean ok = false;
 		try {
-			if(block.modifyShape()) block.findIdealForm(block.traducir(background, bg), background, bg);
+			if(block.modifyShape()) block.findIdealForm(block.traducir(this, bg), this, bg);
 			moveBlockToBackground();
 			if(block.borrarCercanos()) updateCuadrosLaterales();
 		}catch(Exception e) {ok = true;  Log.registre(e);}
@@ -475,29 +429,7 @@ public class Tablero extends Thread implements Serializable{
 		}
 	}
 
-	public void setVelocidad(int v) {
-		velocidad = v;
-	}
 
-	
-	public int getVelocidad() {		
-		return velocidad;
-	}
-
-
-	/**
-	 * Pausa el juego
-	 */
-	public static void pausar() {
-			paused = true;
-	}
-
-	 /**
-	 * Despausa el juego
-	 */
-	public static void despausar() {
-		paused = false;	
-}
 	public static boolean isUniforme() {
 		return uniforme;
 	}
@@ -505,21 +437,16 @@ public class Tablero extends Thread implements Serializable{
 	
 	public void setMovilidadBlock(boolean p) {
 		if(block != null) block.setMovilidad(p);
-		
-	}
-	
-	public Color getBg() {
-		return bg;
 	}
 	
 	public int getPuntuacionBloques() {
 		return Puntuacion;
 	}
 
-	public BloqueTetris getBlock(){
-		return block;
+	public int[] getPositionBlock(){
+		return new int[]{block.getX(), block.getY()};
 	}
-	
+
 	public int getTiempo() {
 		return (int) tiempo;
 	}
@@ -533,30 +460,10 @@ public class Tablero extends Thread implements Serializable{
 		for(Tablero t :tableros) {
 			t.numBuffs = buffs;			
 		}
-		
 		Buffo.prepareBuffos(buffs);
 		
 	}
-	
-	public int  getNumBuffs() {
-		return numBuffs;
-	}
-	
-	/*
-	 * Valida que el bloque cabe el bloque cabe en el tablero dada su posicion
-	 */
 
-	public boolean isValidPosition(BloqueTetris bloq) {
-		for(int[] c :bloq.getCoordenadas()) {
-			try{
-				if(c[1] ==  bloq.getY() + bloq.getHeight()-2 && c[1]+1 < Tablero.filas && c[0]+1 < Tablero.cols && quedaraHueco(c, bloq) ) return false;
-				if(background[c[1]][c[0]] != bg) return false;					
-			}catch (Exception e) {return false;}
-		}
-		return true;
-	}
-	
-	
 	/*
 	 * Validar que no queden huecos debajo de la penultima fila
 	 */
@@ -569,6 +476,10 @@ public class Tablero extends Thread implements Serializable{
 		}
 		else return false;
 		
+	}
+
+	public void setVelocidad(int v) {
+		velocidad = v;
 	}
 }
 
