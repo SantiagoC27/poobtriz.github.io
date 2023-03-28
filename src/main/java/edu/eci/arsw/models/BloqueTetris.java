@@ -1,6 +1,5 @@
 package edu.eci.arsw.models;
 
-import java.awt.Color;
 import java.io.Serializable;
 import java.util.*;
 
@@ -204,8 +203,9 @@ public class BloqueTetris implements Cloneable, Serializable {
 	/**
 	 * Genera un bloque de tetris aleatorio en forma color y reborde
 	 */
-	private static BloqueTetris selectRandomBlock() {
-		int n = new Random().nextInt(formas.length);   
+	private static BloqueTetris selectRandomBlock(String bg) {
+		int n = new Random().nextInt(formas.length);
+		if (Objects.equals(colores[n], bg)) return selectRandomBlock(bg);
 		Reborde r = Reborde.randomReborde();
 		return new BloqueTetris(formas[n],r, colores[n], n);
 	}
@@ -214,14 +214,14 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 /**
 	 * Toma un bloque del arreglo de bloques
 	 * @param pos de la cualse quiere tomar
+	  * @param bg Color que no puede ser tomado
 	 * @return el bloque
 	 */
-	public static BloqueTetris getRandomBlock(int pos) {//======>==================================== meter la secuencia q me salio
+	public static BloqueTetris getRandomBlock(int pos, String bg) {//======>==================================== meter la secuencia q me salio
 			while(pos >= bloquesShared.size()) {
-				BloqueTetris bloqueAleatorio = selectRandomBlock();
+				BloqueTetris bloqueAleatorio = selectRandomBlock(bg);
 				bloquesShared.add(bloqueAleatorio);				
 			}
-		
 		return  bloquesShared.get(pos).Clone();
 	}
 	

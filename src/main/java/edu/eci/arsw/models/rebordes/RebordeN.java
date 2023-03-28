@@ -3,8 +3,7 @@ import java.awt.Color;
 public class RebordeN extends Reborde{
 	//classic
 	public RebordeN() {
-		super(Color.black);
-		super.color = Color.black;
+		super("black");
 	}
 
 	public boolean isBorrable() {

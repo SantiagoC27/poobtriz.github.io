@@ -108,7 +108,7 @@ public class Tablero implements Serializable{
 	 */
 	public void spawnBlock() {
 		// TODO modificar para que use la lista de bloques
-		block = BloqueTetris.getRandomBlock(bloquesUsados);
+		block = BloqueTetris.getRandomBlock(bloquesUsados, bg);
 		block.spawn(cols);
 
 	}
@@ -140,11 +140,13 @@ public class Tablero implements Serializable{
 		if(block == null) spawnBlock();
 		if(isFinal() || Colision(1,0)) haBajado = false;
 		else {
+			removeBlockFromBackground();
 			block.moveDown();
+			moveBlockToBackground();
 			validateBuffo(0,0);
 		}
 		return haBajado;
-}
+	}
 
 
 	 /**
@@ -152,8 +154,9 @@ public class Tablero implements Serializable{
 	 * @return si choca con otros bloques
 	 */
 	private boolean Colision(int y, int x) {
-		for(int[] c : block.getCoordenadas()) {
-			if(background[c[1]+y][c[0]+x] != bg ) {
+		int[][] coords = block.getCoordenadas();
+		for(int[] c : coords) {
+			if(!Objects.equals(background[c[1] + y][c[0] + x], bg) && !Arrays.asList(coords).contains(c)) {
 				return true;
 			}
 		}
@@ -282,17 +285,26 @@ public class Tablero implements Serializable{
 	/**
 	 * Pasa los colores del tetromino al tablero
 	*/
-	public void moveBlockToBackground() {
+	private void moveBlockToBackground() {
 			for(int[] co :block.getCoordenadas()) {
 				if(co[1] < filas && co[0]< cols) {
 					background[co[1]][co[0]] = block.getColor();
 					bgReborde[co[1]][co[0]] = block.getReborde();
 				}
 			}
-			bloquesUsados++;			
-			
 	}
 
+	/**
+	 * Remueve los colores del bloque del tablero
+	 */
+	private void removeBlockFromBackground() {
+		for(int[] co :block.getCoordenadas()) {
+			if(co[1] < filas && co[0]< cols) {
+				background[co[1]][co[0]] = bg;
+				bgReborde[co[1]][co[0]] = null;
+			}
+		}
+	}
 
 
 	/**

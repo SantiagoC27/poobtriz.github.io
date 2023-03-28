@@ -4,8 +4,8 @@ import java.awt.Color;
 public class RebordeP extends Reborde{
 	//useless
 	public RebordeP() {
-		super(new Color(192, 192, 192));
-		this.color = new Color(192, 192, 192); 
+		super("blue");
+		this.color = "blue";
 		
 	}
 	

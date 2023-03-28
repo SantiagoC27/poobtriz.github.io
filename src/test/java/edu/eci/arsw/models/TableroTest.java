@@ -1,8 +1,5 @@
 package edu.eci.arsw.models;
 
-import java.awt.Color;
-
-
 import edu.eci.arsw.shared.TetrisException;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +70,7 @@ public class TableroTest {
 
 		//Line doesn't cleared
 		for (int k = 0; k < cols - 1; k++) {
-			assertEquals(t.background[filas-1][k], Color.red);
+			assertEquals(t.background[filas-1][k], "red");
 		}
 	}
 
@@ -92,5 +89,4 @@ public class TableroTest {
 		t.addPuntuacion(t.clearLines());
 		assertEquals(1, t.getPuntuacionBloques());
 	}
-
 }

@@ -32,21 +32,20 @@ public class GameThread implements Runnable{
     @Override
     public void run(){
         instanceGame();
-        int velocidad = 4000; // TODO dinamizar
+        int velocidad = 3000; // TODO dinamizar
         while(!lobby.endGame()){
             for (Player player: lobby.getPlayers()) {
                 synchronized (player){
                     player.moveBlockDown();
                 }
             }
-
+            broadcast();
             try {
                 Thread.sleep(velocidad);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
-            broadcast();
         }
     }
 

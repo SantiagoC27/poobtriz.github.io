@@ -3,8 +3,8 @@ import java.awt.Color;
 public class RebordeD extends Reborde{
 	//winner
 	public RebordeD() {
-		super(Color.decode("#efb810"));
-		super.color = Color.decode("#efb810");
+		super("#efb810");
+		super.color = "#efb810";
 	}
 	
 	public boolean isBorrable() {

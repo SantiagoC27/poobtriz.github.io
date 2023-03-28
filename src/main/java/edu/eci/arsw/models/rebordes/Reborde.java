@@ -1,6 +1,5 @@
 package edu.eci.arsw.models.rebordes;
 
-import java.awt.Color;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
@@ -8,9 +7,9 @@ import java.util.ArrayList;
 
 
 public abstract class Reborde implements Cloneable, Serializable{
-	protected Color color;
+	protected String color;
 	
-	public Reborde(Color color) {
+	public Reborde(String color) {
 		this.color = color;
 	}
 	
@@ -50,7 +49,7 @@ public abstract class Reborde implements Cloneable, Serializable{
 		
 	}
 	
-	public Color getColor() {
+	public String getColor() {
 		return color;
 	}
 
