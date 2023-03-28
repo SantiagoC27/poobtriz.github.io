@@ -2,11 +2,7 @@ package edu.eci.arsw.models;
 
 import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import edu.eci.arsw.shared.Log;
 import edu.eci.arsw.models.rebordes.Reborde;
@@ -17,11 +13,11 @@ public class BloqueTetris implements Cloneable, Serializable {
 	//C, L, LINE, T, Z
 	public static int[][][] formas ={{{1,1}, {1,1}}, {{1,0}, {1,0}, {1,1}}, {{1,1,1,1}},
 									{{1,1,1}, {0,1,0}}, {{1,1,0}, {0,1,1}} };
-	public static Color[] colores= {Color.yellow, Color.CYAN, Color.blue, Color.pink, Color.ORANGE};
+	public static String[] colores= {"yellow", "blue", "pink", "orange", "indigo"};
 	private final static List<BloqueTetris> bloquesShared = new ArrayList<>();
 	private int[][] shape;
 	
-	private final Color color;
+	private final String color;
 	private int x, y;
 	protected int[][][] rotaciones;
 	private int currentRotation;
@@ -30,7 +26,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	private final int currentForm;
 	
 	
-	public BloqueTetris(int[][] shape, Reborde r, Color c, int cu) {
+	public BloqueTetris(int[][] shape, Reborde r, String c, int cu) {
 		this.reborde = r;
 		this.shape = shape;
 		this.color = c;
@@ -294,7 +290,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	}
 	
 	
-	public void findIdealForm(int[][] data, Tablero t, Color col) {
+	public void findIdealForm(int[][] data, Tablero t, String col) {
 		int indx = 0;
 		double[][] dataForms = new double[formas.length*4][3];
 		
@@ -313,11 +309,11 @@ public class BloqueTetris implements Cloneable, Serializable {
 		
 	}
 
-	private boolean isBajable(Tablero t, Color col) {//get downest squares, por cada coord de ellos, si hay algo all�
+	private boolean isBajable(Tablero t, String col) {//get downest squares, por cada coord de ellos, si hay algo all�
 		for(int[] co :this.getDownsetSquares(t)) {
 			try {
 				//Si abajo esta vacio, mover abajo
-				if(t.getBackground()[co[1]+1][co[0]] != col) return false;
+				if(!Objects.equals(t.getBackground()[co[1] + 1][co[0]], col)) return false;
 			}catch(Exception e) {
 				return false;
 				}
@@ -417,13 +413,13 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 * 1 si ahi puede caber una ficha, 0 si no.
 	 */
 
-	public int[][] traducir(Tablero t, Color col) {
+	public int[][] traducir(Tablero t, String col) {
 		int[][] rta = new int[5][];
 		int cont = 0;
 		for(int i = y; i < t.getFilas() && i < y + 4; i++) {
 			int[] aux = new int[t.getCols()-x];
 			for(int j =x; j < t.getCols() && j <x + 4; j++) {
-				if(t.getBackground()[i][j] == col) aux[j-x] = 1;  else aux[j-x] = 0;
+				if(Objects.equals(t.getBackground()[i][j], col)) aux[j-x] = 1;  else aux[j-x] = 0;
 			}
 			rta[cont] = aux;
 			cont++;

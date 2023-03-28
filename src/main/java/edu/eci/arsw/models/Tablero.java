@@ -1,29 +1,31 @@
 package edu.eci.arsw.models;
 
-import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.google.gson.annotations.Expose;
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.Log;
-import edu.eci.arsw.shared.TetrisException;
 import lombok.Getter;
+import lombok.ToString;
 
 
 @Getter
 public class Tablero implements Serializable{
+
 
 	private final int filas;
 	private final int cols;
 	private Buffo buffo;
 	private int numBuffs;
 	public static List<Tablero> tableros = new ArrayList<>();
-	public Color[][] background;
+
+	private final ConcurrentLinkedQueue<BloqueTetris> bloques;
+	@Expose
+	public String[][] background;
+	@Expose
 	public Reborde[][] bgReborde;
 	private int bloquesUsados = 0;
 	private BloqueTetris block = null;
@@ -31,16 +33,17 @@ public class Tablero implements Serializable{
 	private static final int disminucionVel = 100;
 	private static boolean uniforme = true;
 
-	private final Color bg;
+	private final String bg;
 	private int Puntuacion = 0;
 	private int tiempo = 0;
-	public Tablero(boolean uniforme, int vel, Color c, int filas, int cols) {
+	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, ConcurrentLinkedQueue<BloqueTetris> bloques) {
+		this.bloques = bloques;
 		this.filas = filas;
 		this.cols = cols;
-		bg = c;
+		this.bg = bg;
 		Tablero.uniforme = uniforme;
 		velocidad = vel;
-		this.background = new Color[filas][cols];
+		this.background = new String[filas][cols];
 		this.bgReborde =  new Reborde[filas][cols];
 		tableros.add(this);
 		llenarMatriz();
@@ -104,6 +107,7 @@ public class Tablero implements Serializable{
 	 * Genera un tetromino aleatorio
 	 */
 	public void spawnBlock() {
+		// TODO modificar para que use la lista de bloques
 		block = BloqueTetris.getRandomBlock(bloquesUsados);
 		block.spawn(cols);
 
@@ -130,11 +134,10 @@ public class Tablero implements Serializable{
 	/**
 	 * Baja el bloque si es posible
 	 * @return si es posible bajar el bloque
-	 * @throws TetrisException Si no existe bloque
 	 */
-	public boolean moveBlockDown() throws TetrisException {
+	public boolean moveBlockDown(){
 		boolean haBajado = true;
-		if(block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
+		if(block == null) spawnBlock();
 		if(isFinal() || Colision(1,0)) haBajado = false;
 		else {
 			block.moveDown();

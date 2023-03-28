@@ -16,7 +16,7 @@ public class TableroTest {
 
 	@Before
 	public void genTablero(){
-		t = new Tablero(true, 1000, Color.yellow, filas, cols);
+		t = new Tablero(true, 1000, "yellow", filas, cols, null);
 		t.spawnBlock();
 	}
 	
@@ -57,9 +57,9 @@ public class TableroTest {
 	public void testClearLines() {
 		//Fill two lines completed
 		for(int i = 0; i < cols; i++) {
-			t.background[filas-1][i] = Color.red;
-			t.background[filas-2][i] = Color.red;
-			t.background[filas-3][i] = Color.red;
+			t.background[filas-1][i] = "red";
+			t.background[filas-2][i] = "red";
+			t.background[filas-3][i] = "red";
 		}
 		// Line not completed
 		t.background[filas-3][cols-1] = t.getBg();
@@ -87,7 +87,7 @@ public class TableroTest {
 	@Test
 	public void DeberiaSumarPuntuacion(){
 		for(int i = 0; i <= 9; i++) {
-			t.background[19][i] = Color.red;				
+			t.background[19][i] = "red";
 		}
 		t.addPuntuacion(t.clearLines());
 		assertEquals(1, t.getPuntuacionBloques());

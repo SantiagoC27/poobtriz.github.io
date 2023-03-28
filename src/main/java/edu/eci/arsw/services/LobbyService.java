@@ -3,9 +3,16 @@ package edu.eci.arsw.services;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
+import edu.eci.arsw.persistence.lobby.ILobbyDAO;
 import edu.eci.arsw.shared.TetrisException;
 
 public class LobbyService {
+
+    private final ILobbyDAO lobbyDAO;
+
+    public LobbyService(ILobbyDAO lobbyDAO){
+        this.lobbyDAO = lobbyDAO;
+    }
 
     public Lobby createLobby(Admin admin){
         return null;
@@ -30,4 +37,12 @@ public class LobbyService {
 
     }
 
+    public boolean isAdmin(String username, int codigo) {
+        // TODO
+        return true;
+    }
+
+    public Lobby get(int codigo) {
+        return this.lobbyDAO.get(codigo);
+    }
 }
