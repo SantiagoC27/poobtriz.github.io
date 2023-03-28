@@ -25,8 +25,11 @@ public class Lobby {
     }
 
     public boolean endGame(){
-        // TODO
-        return false;
+        boolean finished = true;
+        for (Player p : players) {
+            if(!p.hasFinished()) finished = false;
+        }
+        return finished;
     }
 
     @Override

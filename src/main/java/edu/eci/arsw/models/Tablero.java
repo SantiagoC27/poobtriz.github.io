@@ -237,6 +237,7 @@ public class Tablero implements Serializable{
 	
 	/**
 	 * Valida si una linea es borrable o no, y en caso de que si la borra
+	 * return total de lineas borradas
 	 */
 	public int clearLines() {
 			boolean lineFilled;
@@ -258,6 +259,12 @@ public class Tablero implements Serializable{
 				}
 			}
 			return linesCleared;
+
+	}
+
+	public void calculatePuntuacion(){
+		int linesCleared = this.clearLines();
+		this.addPuntuacion(linesCleared*10);
 
 	}
 

@@ -36,7 +36,9 @@ public class GameThread implements Runnable{
         while(!lobby.endGame()){
             for (Player player: lobby.getPlayers()) {
                 synchronized (player){
-                    player.moveBlockDown();
+                    if(!player.moveBlockDown()){
+                        player.calculatePuntuacion();
+                    }
                 }
             }
             broadcast();

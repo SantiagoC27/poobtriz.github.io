@@ -15,10 +15,7 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.models.Tablero;
-import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.TetrisService;

@@ -60,7 +60,15 @@ public abstract class Player implements Serializable {
 
 	}
 
-	public void moveBlockDown() {
-		tablero.moveBlockDown();
+	public boolean moveBlockDown() {
+		return tablero.moveBlockDown();
+	}
+
+	public void calculatePuntuacion(){
+		tablero.calculatePuntuacion();
+	}
+
+	public boolean hasFinished() {
+		return tablero.finGame();
 	}
 }
