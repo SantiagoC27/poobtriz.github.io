@@ -1,9 +1,11 @@
 package edu.eci.arsw.websockets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.websocket.OnClose;
@@ -45,8 +47,9 @@ public class GameSocket {
         if (lobbyService.isAdmin(username, codigo)){
             Lobby l = lobbyService.get(codigo);
             try{
-                Thread t = new Thread(new GameThread(l, sessions));
-                t.start();
+                GameThread gt =new GameThread(l, sessions);
+                gt.start();
+                games.add(gt);
             }catch (Exception e){ e.printStackTrace();}
         }
 
@@ -68,7 +71,9 @@ public class GameSocket {
 
     @OnMessage
     public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo){
-        System.out.println("Mensaje recibido");
+        GameThread gt =games.stream().filter( t -> t.getCodigo() == codigo).collect(Collectors.toList()).get(0);
+        gt.moveBlock(username, message);
+
     }
 
     private void broadcast(String message) {

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.rebordes.Reborde;
+import edu.eci.arsw.shared.TetrisException;
 import lombok.Setter;
 
 
@@ -67,5 +68,17 @@ public abstract class Player implements Serializable {
 
 	public boolean hasFinished() {
 		return tablero.hasFinished();
+	}
+
+	public void turnBlock() throws TetrisException {
+		tablero.rotarBlock();
+	}
+
+	public void moveBlockLeft() throws TetrisException {
+		tablero.moveBlockLeft();
+	}
+
+	public void moveBlockRight() throws TetrisException {
+		tablero.moveBlockRight();
 	}
 }

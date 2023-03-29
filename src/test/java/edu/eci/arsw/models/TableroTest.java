@@ -43,7 +43,7 @@ public class TableroTest {
 	}
 
 	@Test
-	public void testMoveBlockLeft() {
+	public void testMoveBlockLeft() throws TetrisException{
 		int[] initPos = t.getPositionBlock();
 		for (int i = 1; i < cols/2 + 1; i++) {
 			t.moveBlockLeft();

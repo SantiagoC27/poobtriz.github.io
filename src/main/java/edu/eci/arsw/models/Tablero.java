@@ -207,7 +207,8 @@ public class Tablero implements Serializable{
 	 * Mueve el bloque a la izquierda si es posible
 	 *
 	 */
-	public boolean moveBlockLeft() {
+	public boolean moveBlockLeft() throws TetrisException {
+		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
 			if(block.getX() -1 >= 0 && !Colision(0,-1)){
 				validateBuffo(-1,0);
 				block.moveLeft();
@@ -302,7 +303,8 @@ public class Tablero implements Serializable{
 	/**
 	 * Se encarga de rotar la ficha 
 	 */
-	public void rotarBlock() {
+	public void rotarBlock() throws TetrisException {
+		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
 			if(isRotable()) {
 				block.rotar(this);
 				validateBuffo(0,0);				

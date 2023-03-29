@@ -6,12 +6,12 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class Lobby {
     private int codigo;
-    @Getter
+
     private Estado estado;
 
-    @Getter
     private List<Player> players;
 
     public Lobby(int codigo){

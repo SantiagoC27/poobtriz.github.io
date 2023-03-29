@@ -9,19 +9,20 @@ import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.shared.TetrisException;
 
 import javax.websocket.Session;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
-public class GameThread implements Runnable{
+public class GameThread extends Thread{
 
     private static final Gson gson = new Gson();
     private final Lobby lobby;
     private List<BloqueTetris> bloques;
     Map<String, Session> session = new ConcurrentHashMap<>();
 
+    public int getCodigo(){
+        return lobby.getCodigo();
+    }
 
     public GameThread(Lobby lobby, Map<String, Session> sessions) throws Exception{
         this.lobby = lobby;
@@ -94,5 +95,31 @@ public class GameThread implements Runnable{
                 new Jugador("x", new Tablero(true, 1000, "red", 20, 10, Collections.synchronizedList(new ArrayList<>()))));
         Thread gt = new Thread(new GameThread(l));
         gt.start();
+    }
+
+    public void moveBlock(String username, String movement) {
+        Player player = lobby.getPlayers().stream().filter(p -> Objects.equals(p.getNick(), username)).collect(Collectors.toList()).get(0);
+        synchronized (player){
+            try{
+                switch (movement.toUpperCase()){
+                    case "DOWN":
+                        player.moveBlockDown();
+                        break;
+                    case "UP":
+                        player.turnBlock();
+                        break;
+                    case "LEFT":
+                        player.moveBlockLeft();
+                        break;
+                    case "RIGHT":
+                        player.moveBlockRight();
+                        break;
+                }
+            }catch (TetrisException e){
+                e.printStackTrace();
+            }
+        }
+        broadcast();
+
     }
 }
