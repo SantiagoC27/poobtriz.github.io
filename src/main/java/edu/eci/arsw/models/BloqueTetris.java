@@ -12,7 +12,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	//C, L, LINE, T, Z
 	public static int[][][] formas ={{{1,1}, {1,1}}, {{1,0}, {1,0}, {1,1}}, {{1,1,1,1}},
 									{{1,1,1}, {0,1,0}}, {{1,1,0}, {0,1,1}} };
-	public static String[] colores= {"yellow", "blue", "pink", "orange", "indigo"};
+	public static String[] colores= {"magenta", "blue", "pink", "orange", "indigo"};
 	private final static List<BloqueTetris> bloquesShared = new ArrayList<>();
 	private int[][] shape;
 	
@@ -142,20 +142,17 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 
 	 /**
-	 * Retorna las coordenas en las que se encuentra la ficha de la forma x,y
+	 * Retorna las coordenas en las que se encuentra la ficha de la forma x,y. Excluye coordenadas negativas
 	 * @return las coordenadas
 	 */
 	public int[][] getCoordenadas() {
 		int cont = 0;
 		int[][] posiciones = new int[4][];
-		int[] aux;	
+
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
 				if(shape[r][c] == 1) {
-					aux = new int[2];
-					aux[0] = c + x;
-					if(r + y < 0) aux[1] = 0; else aux[1] = r + y;
-					posiciones[cont] = aux;
+					posiciones[cont] = new int[]{c + x, r + y};
 					cont++;
 				}
 			}
@@ -170,35 +167,17 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public int[][] getCoordenadasCercanas() {
 		int[][] posiciones = new int[16][2];
 		int cont = 0;
-		int[] aux;
 		for(int[] c :this.getCoordenadas()) {
-			aux = new int[2];
-			aux[0] = c[0]-1;
-			aux[1] = c[1];
-			posiciones[cont] = aux;
-			cont++;
-			aux = new int[2];
-			aux[0] = c[0]+1;
-			aux[1] = c[1];
-			posiciones[cont] = aux;
-			cont++;
-			aux = new int[2];
-			aux[0] = c[0];
-			aux[1] = c[1]+1;
-			posiciones[cont] = aux;
-			cont++;
-			aux = new int[2];
-			aux[0] = c[0];
-			aux[1] = c[1];
-			posiciones[cont] = aux;
+			posiciones[cont] = new int[]{c[0]-1, c[1]};
+			posiciones[cont+1] = new int[]{c[0]+1, c[1]};
+			posiciones[cont+2] = new int[]{c[0], c[1]+1};
+			posiciones[cont+3] = new int[]{c[0], c[1]-1};
+			posiciones[cont+4] = new int[]{c[0], c[1]};
+			cont += 4;
 			cont++;
 		}
 		return posiciones;
 	}
-
-	
-	public int getLeftEdge() {return x;}
-	public int getRigthEdge() {return x + getWidth();}
 
 	/**
 	 * Genera un bloque de tetris aleatorio en forma color y reborde

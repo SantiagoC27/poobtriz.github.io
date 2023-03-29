@@ -1,13 +1,11 @@
 package edu.eci.arsw.models.player;
 
-import java.awt.Color;
-import java.awt.event.KeyListener;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.rebordes.Reborde;
-import edu.eci.arsw.shared.TetrisException;
 import lombok.Setter;
 
 
@@ -57,7 +55,6 @@ public abstract class Player implements Serializable {
 
 	public void setVelocidad(int velInicial) {
 		tablero.setVelocidad(velInicial);
-
 	}
 
 	public boolean moveBlockDown() {
@@ -69,6 +66,6 @@ public abstract class Player implements Serializable {
 	}
 
 	public boolean hasFinished() {
-		return tablero.finGame();
+		return tablero.hasFinished();
 	}
 }

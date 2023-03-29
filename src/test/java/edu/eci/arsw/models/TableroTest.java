@@ -4,6 +4,8 @@ import edu.eci.arsw.shared.TetrisException;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.Assert.*;
 
 public class TableroTest {
@@ -13,7 +15,7 @@ public class TableroTest {
 
 	@Before
 	public void genTablero(){
-		t = new Tablero(true, 1000, "yellow", filas, cols, null);
+		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>());
 		t.spawnBlock();
 	}
 	
@@ -31,7 +33,7 @@ public class TableroTest {
 	}
 
 	@Test
-	public void moveBlockRight() {
+	public void moveBlockRight() throws TetrisException{
 		int[] initPos = t.getPositionBlock();
 		for (int i = 1; i <= cols/2 - t.getBlock().getWidth(); i++) {
 			t.moveBlockRight();

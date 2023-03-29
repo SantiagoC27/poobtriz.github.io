@@ -3,13 +3,14 @@ package edu.eci.arsw.models.buffos;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.awt.Color;
 import java.io.Serializable;
 
 import edu.eci.arsw.models.Tablero;
+import lombok.Getter;
 
+@Getter
 public abstract class Buffo implements Serializable{
-	protected Color c;
+	protected String color;
 	private int x;
 	private int y;
 	private static List<String> buffos = llenarPosibleBuffos();
@@ -56,8 +57,8 @@ public abstract class Buffo implements Serializable{
 	 * @return si esta o no esta
 	 */
 	private static boolean isValidNum(List<Integer> nums, int n) {
-		for(int i = 0; i < nums.size(); i++) {
-			if(nums.get(i) == n) return false;
+		for (Integer num : nums) {
+			if (num == n) return false;
 		}
 		return true;
 		
@@ -76,22 +77,6 @@ public abstract class Buffo implements Serializable{
 		buffos.add("X");
 		return buffos;
 	}
-
-
-	public Color getColor() {
-		return c;
-	}
-
-
-	public int getX() {
-		return x;
-	}
-
-
-	public int getY() {
-		return y;
-	}
-
 
 	 /**
 	 * Activa el buffo

@@ -1,6 +1,5 @@
 package edu.eci.arsw.models.buffos;
 
-import java.awt.Color;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,7 +8,7 @@ import edu.eci.arsw.models.Tablero;
 public class BuffoST extends Buffo{
 	public BuffoST(int[] c) {
 		super(c);
-		super.c = Color.yellow;
+		super.color = "yellow";
 	}
 
 	public void activate(final Tablero t) {

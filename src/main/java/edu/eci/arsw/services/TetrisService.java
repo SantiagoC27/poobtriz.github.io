@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.websocket.Session;
-import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class TetrisService implements Runnable{
@@ -96,7 +96,7 @@ public class TetrisService implements Runnable{
 
 
     private void instanceGame(Lobby lobby){
-        ConcurrentLinkedQueue<BloqueTetris> bloques = new ConcurrentLinkedQueue<>();
+        List<BloqueTetris> bloques = Collections.synchronizedList(new ArrayList<>());
         Tablero t;
         //Generar un tablero con la misma lista de bloques (atomica)
         for (Player player: lobby.getPlayers()) {

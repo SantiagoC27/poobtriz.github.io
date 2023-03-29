@@ -13,4 +13,6 @@ public class TetrisException extends Exception
         super(_message);
     }
     public static final String INVALID_SESSION = "La sesión no tiene a los integrantes del lobby";
+    public static final String BLOCK_NULL = "No se puede generar el movimiento porque el bloque está nulo";
+
 }

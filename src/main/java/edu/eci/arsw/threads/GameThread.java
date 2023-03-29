@@ -4,19 +4,22 @@ import com.google.gson.Gson;
 import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.Tablero;
+import edu.eci.arsw.models.player.Jugador;
 import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.shared.TetrisException;
 
 import javax.websocket.Session;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class GameThread implements Runnable{
 
     private static final Gson gson = new Gson();
     private final Lobby lobby;
-    private ConcurrentLinkedQueue<BloqueTetris> bloques;
+    private List<BloqueTetris> bloques;
     Map<String, Session> session = new ConcurrentHashMap<>();
 
 
@@ -29,10 +32,14 @@ public class GameThread implements Runnable{
         }
     }
 
+    public GameThread(Lobby lobby){
+        this.lobby = lobby;
+    }
+
     @Override
     public void run(){
         instanceGame();
-        int velocidad = 3000; // TODO dinamizar
+        int velocidad = 1000; // TODO dinamizar
         while(!lobby.endGame()){
             for (Player player: lobby.getPlayers()) {
                 synchronized (player){
@@ -56,7 +63,7 @@ public class GameThread implements Runnable{
      * Inicializa los tableros de los jugadores con una misma lista de bloques
      */
     private void instanceGame(){
-        bloques = new ConcurrentLinkedQueue<>();
+        bloques = Collections.synchronizedList(new ArrayList<>());
         Tablero t;
         for (Player player: lobby.getPlayers()) {
             // TODO dinamizar parametros
@@ -78,5 +85,14 @@ public class GameThread implements Runnable{
                 }
             });
         });
+    }
+
+
+    public static void main(String[] args) throws Exception{
+        Lobby l = new Lobby(1);
+        l.addPlayer(
+                new Jugador("x", new Tablero(true, 1000, "red", 20, 10, Collections.synchronizedList(new ArrayList<>()))));
+        Thread gt = new Thread(new GameThread(l));
+        gt.start();
     }
 }

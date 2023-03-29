@@ -2,14 +2,13 @@ package edu.eci.arsw.models;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.google.gson.annotations.Expose;
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.Log;
+import edu.eci.arsw.shared.TetrisException;
 import lombok.Getter;
-import lombok.ToString;
 
 
 @Getter
@@ -22,7 +21,7 @@ public class Tablero implements Serializable{
 	private int numBuffs;
 	public static List<Tablero> tableros = new ArrayList<>();
 
-	private final ConcurrentLinkedQueue<BloqueTetris> bloques;
+	private final List<BloqueTetris> bloques;
 	@Expose
 	public String[][] background;
 	@Expose
@@ -36,7 +35,9 @@ public class Tablero implements Serializable{
 	private final String bg;
 	private int Puntuacion = 0;
 	private int tiempo = 0;
-	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, ConcurrentLinkedQueue<BloqueTetris> bloques) {
+
+	private boolean finGame = false;
+	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques) {
 		this.bloques = bloques;
 		this.filas = filas;
 		this.cols = cols;
@@ -104,11 +105,12 @@ public class Tablero implements Serializable{
 	
 	
 	/**
-	 * Genera un tetromino aleatorio
+	 * Genera un tetromino aleatorio con color distinto al del fondo del tablero.
 	 */
 	public void spawnBlock() {
-		// TODO modificar para que use la lista de bloques
-		block = BloqueTetris.getRandomBlock(bloquesUsados, bg);
+		bloquesUsados++;
+		if(bloquesUsados > bloques.size()) bloques.add(BloqueTetris.getRandomBlock(bloquesUsados, bg));
+		block = bloques.get(bloquesUsados - 1);
 		block.spawn(cols);
 
 	}
@@ -117,18 +119,7 @@ public class Tablero implements Serializable{
 		bloquesUsados += n;
 	}
 	
-	/**
-	 * Valida si el game se debe terminar en base a la posicion del tablero
-	 * @return si el game debe terminar
-	 */
-	public boolean isBlockOutOfBounds() {
-		if(block.getY() < 0) {
-			block = null;
-			return true;
-		}
-		return false;
-	}
-	
+
 
 
 	/**
@@ -137,8 +128,16 @@ public class Tablero implements Serializable{
 	 */
 	public boolean moveBlockDown(){
 		boolean haBajado = true;
-		if(block == null) spawnBlock();
-		if(isFinal() || Colision(1,0)) haBajado = false;
+		boolean wasNull = false;
+		if(block == null) {
+			spawnBlock();
+			wasNull = true;
+		}
+		if(isFinalTablero() || Colision(1,0)){
+			haBajado = false;
+			block = null;
+			if (wasNull) finGame = true;
+		}
 		else {
 			removeBlockFromBackground();
 			block.moveDown();
@@ -148,7 +147,6 @@ public class Tablero implements Serializable{
 		return haBajado;
 	}
 
-
 	 /**
 	 * Valida que el bloque tenga colision con otros bloques
 	 * @return si choca con otros bloques
@@ -156,9 +154,12 @@ public class Tablero implements Serializable{
 	private boolean Colision(int y, int x) {
 		int[][] coords = block.getCoordenadas();
 		for(int[] c : coords) {
-			if(!Objects.equals(background[c[1] + y][c[0] + x], bg) && !Arrays.asList(coords).contains(c)) {
+
+			if (c[1] + y < 0) continue;
+			// Cuando las siguientes casillas son de otro color, y ese otro color no hace parte del bloque
+			if(!Objects.equals(background[c[1] + y][c[0] + x], bg) &&
+					Arrays.stream(coords).noneMatch(co -> co[0] == c[0] + x && co[1] == c[1] + y))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -166,7 +167,6 @@ public class Tablero implements Serializable{
 	/**
 	 * Crear el schedule para que se actualice la velocidad, el tiempo y el buffo cada cierto tiempo
 	 */
-	
 	public void setVelYBuffos() {
 		final Timer timer = new Timer();
 		TimerTask velDown = new TimerTask() {
@@ -184,40 +184,22 @@ public class Tablero implements Serializable{
 	 * Valida si la figura ya llego al final del tablero
 	 * @return si la figura ya llego al final del tablero
 	 */
-	private boolean isFinal() {
+	private boolean isFinalTablero() {
 		return block.getY() + block.getHeight() == filas;
 	}
-
-	/**
-	 * Valida si la figura ya llego a la maxima poscicion de la izquierda del tablero
-	 * @return si la figura ya llego a la maxima poscicion de la izquierda del tablero
-	 */
-	
-	private boolean checkLeft() {
-		return block.getLeftEdge() > 0;
-	}
-	
-
-	/**
-	 * Valida si la figura ya llego a la maxima poscicion de la derecha del tablero
-	 * @return si la figura ya llego a la maxima poscicion de la derecha del tablero
-	 */
-	private boolean checkRight() {
-		return block.getRigthEdge() < cols;
-	}
-
 	
 	/**
 	 * Mueve el bloque a la derecha si es posible
 	 *
 	 */
-	public boolean moveBlockRight() {
-			if(block.getX() + block.getWidth() < cols && !Colision(0,1)){
-				validateBuffo(1,0);
-				block.moveRight();
-				return true;
-			}
-			return false;
+	public boolean moveBlockRight() throws TetrisException{
+		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
+		if(block.getX() + block.getWidth() < cols && !Colision(0,1)){
+			validateBuffo(1,0);
+			block.moveRight();
+			return true;
+		}
+		return false;
 
 	}
 	
@@ -262,10 +244,12 @@ public class Tablero implements Serializable{
 
 	}
 
+	/**
+	 * Limpia las lineas del tablero, y en base a esto agrega una puntuación.
+	 */
 	public void calculatePuntuacion(){
 		int linesCleared = this.clearLines();
 		this.addPuntuacion(linesCleared*10);
-
 	}
 
 	/** 
@@ -294,6 +278,7 @@ public class Tablero implements Serializable{
 	*/
 	private void moveBlockToBackground() {
 			for(int[] co :block.getCoordenadas()) {
+				if(co[1] < 0) continue;
 				if(co[1] < filas && co[0]< cols) {
 					background[co[1]][co[0]] = block.getColor();
 					bgReborde[co[1]][co[0]] = block.getReborde();
@@ -302,17 +287,17 @@ public class Tablero implements Serializable{
 	}
 
 	/**
-	 * Remueve los colores del bloque del tablero
+	 * Remueve los colores y rebordes del bloque del tablero
 	 */
 	private void removeBlockFromBackground() {
 		for(int[] co :block.getCoordenadas()) {
+			if (co[1]  < 0) continue;
 			if(co[1] < filas && co[0]< cols) {
 				background[co[1]][co[0]] = bg;
 				bgReborde[co[1]][co[0]] = null;
 			}
 		}
 	}
-
 
 	/**
 	 * Se encarga de rotar la ficha 
@@ -335,7 +320,7 @@ public class Tablero implements Serializable{
 		b.rotar(this);
 		int oldPos = b.getY();
 		for(int[] c :b.getCoordenadas()) {
-			
+			if (c[1] < 0) continue;
 			if(oldPos == b.getY() && background[c[1]][c[0]] != bg) return false;
 			if(oldPos != b.getY() && background[c[1]+1][c[0]] != bg) return false;			
 		}
@@ -410,11 +395,11 @@ public class Tablero implements Serializable{
 
 
 	 /**
-	 * Termina el juego
-	 * @return si se termino el juego
+	 * Valida si el juego terminó
 	 */
-	public boolean finGame() {	
-		return isBlockOutOfBounds();
+	public boolean hasFinished() {
+		return finGame;
+
 	}
 
 
