@@ -2,6 +2,7 @@ package edu.eci.arsw.models;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gson.annotations.Expose;
 import edu.eci.arsw.models.buffos.Buffo;
@@ -33,7 +34,7 @@ public class Tablero implements Serializable{
 	private static boolean uniforme = true;
 
 	private final String bg;
-	private int Puntuacion = 0;
+	private final AtomicInteger puntuacion = new AtomicInteger(0);
 	private int tiempo = 0;
 
 	private boolean finGame = false;
@@ -371,18 +372,21 @@ public class Tablero implements Serializable{
 	public boolean acaboGame() {
 		boolean ok = false;
 		try {
-			if(block.modifyShape()) block.findIdealForm(block.traducir(this, bg), this, bg);
+			if (block.modifyShape()) block.findIdealForm(block.traducir(this, bg), this, bg);
 			moveBlockToBackground();
-			if(block.borrarCercanos()) updateCuadrosLaterales();
-		}catch(Exception e) {ok = true;  Log.registre(e);}
-		Puntuacion += clearLines();	
+			if (block.borrarCercanos()) updateCuadrosLaterales();
+		} catch (Exception e) {
+			ok = true;
+			Log.registre(e);
+		}
+		addPuntuacion(clearLines());
 		block = null;
 		return ok;
 	}
 	
-	
-	public void addPuntuacion(int c) {
-		Puntuacion += c; 
+	public void addPuntuacion(int linesCleared) {
+		puntuacion.set(puntuacion.get() + (linesCleared*10));
+		puntuacion.set(clearLines());
 	}
 	
 	/** Modifica la velocidad de caida de los bloques si el modo de juego es acelerado
@@ -449,7 +453,7 @@ public class Tablero implements Serializable{
 	}
 	
 	public int getPuntuacionBloques() {
-		return Puntuacion;
+		return puntuacion.get();
 	}
 
 	public int[] getPositionBlock(){
