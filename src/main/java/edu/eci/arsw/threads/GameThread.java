@@ -22,15 +22,13 @@ public class GameThread extends Thread{
     private final Lobby lobby;
     private final AtomicBoolean playersMoved;
     private List<BloqueTetris> bloques;
-    Map<String, Session> session = new ConcurrentHashMap<>();
 
     public int getCodigo(){
         return lobby.getCodigo();
     }
 
-    public GameThread(Lobby lobby, Map<String, Session> sessions, AtomicBoolean playersMoved){
+    public GameThread(Lobby lobby, AtomicBoolean playersMoved){
         this.lobby = lobby;
-        this.session = sessions;
         this.playersMoved = playersMoved;
     }
 
@@ -40,9 +38,11 @@ public class GameThread extends Thread{
         int velocidad = 1000; // TODO dinamizar
         while(!lobby.endGame()){
             for (Player player: lobby.getPlayers()) {
-                if(!player.moveBlockDown()){
-                    player.calculatePuntuacion();
-                }
+                try {
+                    if(!player.moveBlock("DOWN")){
+                        System.out.println("a");
+                    }
+                }catch (TetrisException e){}
             }
             playersMoved.set(true);
 
@@ -63,7 +63,7 @@ public class GameThread extends Thread{
         Tablero t;
         for (Player player: lobby.getPlayers()) {
             // TODO dinamizar parametros
-            t = new Tablero(true, 1000, "yellow", 20, 10, bloques);
+            t = new Tablero(true, 1000, "yellow", 12, 10, bloques);
             player.setTablero(t);
         }
         lobby.setEstado(Estado.RUNNING);
@@ -76,27 +76,14 @@ public class GameThread extends Thread{
         Lobby l = new Lobby(1);
         l.addPlayer(
                 new Jugador("x", new Tablero(true, 1000, "red", 20, 10, Collections.synchronizedList(new ArrayList<>()))));
-        Thread gt = new Thread(new GameThread(l, null, null));
+        Thread gt = new Thread(new GameThread(l, new AtomicBoolean()));
         gt.start();
     }
 
     public void moveBlock(String username, String movement) {
         Player player = lobby.getPlayers().stream().filter(p -> Objects.equals(p.getNick(), username)).collect(Collectors.toList()).get(0);
             try{
-                switch (movement.toUpperCase()){
-                    case "DOWN":
-                        player.moveBlockDown();
-                        break;
-                    case "UP":
-                        player.turnBlock();
-                        break;
-                    case "LEFT":
-                        player.moveBlockLeft();
-                        break;
-                    case "RIGHT":
-                        player.moveBlockRight();
-                        break;
-                }
+                player.moveBlock(movement.toUpperCase());
             }catch (TetrisException e){
                 e.printStackTrace();
             }

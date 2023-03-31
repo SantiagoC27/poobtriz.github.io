@@ -1,7 +1,6 @@
 package edu.eci.arsw.models.player;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.BloqueTetris;
@@ -58,8 +57,8 @@ public abstract class Player implements Serializable {
 		tablero.setVelocidad(velInicial);
 	}
 
-	public boolean moveBlockDown() {
-		return tablero.moveBlockDown();
+	public boolean moveBlock(String movement) throws TetrisException {
+		return tablero.moveBlock(movement.toUpperCase());
 	}
 
 	public void calculatePuntuacion(){
@@ -70,15 +69,4 @@ public abstract class Player implements Serializable {
 		return tablero.hasFinished();
 	}
 
-	public void turnBlock() throws TetrisException {
-		tablero.rotarBlock();
-	}
-
-	public void moveBlockLeft() throws TetrisException {
-		tablero.moveBlockLeft();
-	}
-
-	public void moveBlockRight() throws TetrisException {
-		tablero.moveBlockRight();
-	}
 }

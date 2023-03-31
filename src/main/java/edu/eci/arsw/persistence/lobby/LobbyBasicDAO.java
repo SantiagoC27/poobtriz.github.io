@@ -10,7 +10,7 @@ public class LobbyBasicDAO implements  ILobbyDAO{
 
     private final Lobby l = new Lobby(11111);
     public LobbyBasicDAO(){
-        l.addPlayer(new Admin("Jaime", new Tablero(true, 1000, "red", 20, 10, null)));
+        l.addPlayer(new Admin("Jaime", new Tablero(true, 1000, "red", 15, 10, null)));
     }
     @Override
     public Lobby get(int codigo) {

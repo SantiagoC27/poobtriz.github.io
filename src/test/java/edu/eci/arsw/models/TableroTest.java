@@ -27,29 +27,29 @@ public class TableroTest {
 	@Test
 	public void moveBlockDown() throws TetrisException {
 		for (int i = 0; i < filas; i++) {
-			assertTrue(t.moveBlockDown());
+			assertTrue(t.moveBlock("DOWN"));
 		}
-		assertFalse(t.moveBlockDown());
+		assertFalse(t.moveBlock("DOWN"));
 	}
 
 	@Test
 	public void moveBlockRight() throws TetrisException{
 		int[] initPos = t.getPositionBlock();
 		for (int i = 1; i <= cols/2 - t.getBlock().getWidth(); i++) {
-			t.moveBlockRight();
+			t.moveBlock("RIGHT");
 			assertEquals(initPos[0] + i, t.getPositionBlock()[0]);
 		}
-		assertFalse(t.moveBlockRight());
+		assertFalse(t.moveBlock("RIGHT"));
 	}
 
 	@Test
 	public void testMoveBlockLeft() throws TetrisException{
 		int[] initPos = t.getPositionBlock();
 		for (int i = 1; i < cols/2 + 1; i++) {
-			t.moveBlockLeft();
+			t.moveBlock("LEFT");
 			assertEquals(initPos[0] - i, t.getPositionBlock()[0]);
 		}
-		assertFalse(t.moveBlockLeft());
+		assertFalse(t.moveBlock("LEFT"));
 	}
 
 	@Test
@@ -89,6 +89,21 @@ public class TableroTest {
 			t.background[19][i] = "red";
 		}
 		t.addPuntuacion(t.clearLines());
-		assertEquals(1, t.getPuntuacionBloques());
+		assertEquals(10, t.getPuntuacionBloques());
+	}
+
+	public void colisionTest(){
+	}
+
+	@Test
+	public void instanceAnotherBLock() throws TetrisException{
+		moveBlockDown();
+		assert(t.getBlock() == null);
+		t.moveBlock("DOWN");
+		assert(t.getBlock() != null);
+		for (int i = 0; i < t.getFilas() / 2; i++) {
+			assert (t.moveBlock("DOWN"));
+		}
+		assert(t.moveBlock("DOWN"));
 	}
 }

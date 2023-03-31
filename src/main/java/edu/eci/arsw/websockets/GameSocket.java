@@ -20,23 +20,15 @@ import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
 import edu.eci.arsw.threads.GameSession;
 import edu.eci.arsw.services.LobbyService;
-import edu.eci.arsw.services.TetrisService;
 import edu.eci.arsw.shared.TetrisException;
-import edu.eci.arsw.threads.GameThread;
-import org.jboss.logging.Logger;
 
 @ServerEndpoint(value ="/game/{username}/{codigo}")
 @ApplicationScoped
 public class GameSocket {
 
-    private static final Gson GSON = new Gson();
-    private static final Logger LOG = Logger.getLogger(GameSocket.class);
-
     List<GameSession> games = new ArrayList<>();
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
-
-    private final TetrisService tetrisService = new TetrisService(sessions);
 
     private final LobbyService lobbyService = new LobbyService(new LobbyBasicDAO());
 

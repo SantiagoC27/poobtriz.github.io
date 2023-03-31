@@ -30,7 +30,7 @@ public class GameSession extends Thread{
         this.sessions = allSessions;
         this.playersMoved = new AtomicBoolean(false);
         this.lobbyService = lobbyService;
-        gt =new GameThread(this.lobby, this.sessions, this.playersMoved);
+        gt =new GameThread(this.lobby, this.playersMoved);
 
     }
 

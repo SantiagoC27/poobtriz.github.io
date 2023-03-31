@@ -113,53 +113,43 @@ public class Tablero implements Serializable{
 		if(bloquesUsados > bloques.size()) bloques.add(BloqueTetris.getRandomBlock(bloquesUsados, bg));
 		block = bloques.get(bloquesUsados - 1);
 		block.spawn(cols);
-
 	}
-	
-	public void addBloquesU(int n) {
-		bloquesUsados += n;
-	}
-	
-
 
 
 	/**
 	 * Baja el bloque si es posible
 	 * @return si es posible bajar el bloque
 	 */
-	public boolean moveBlockDown(){
-		boolean haBajado = true;
-		boolean wasNull = false;
-		if(block == null) {
-			spawnBlock();
-			wasNull = true;
-		}
-		if(isFinalTablero() || Colision(1,0)){
-			haBajado = false;
-			block = null;
-			if (wasNull) finGame = true;
-		}
-		else {
-			removeBlockFromBackground();
+	private boolean moveBlockDown(){
+		boolean haBajado = false;
+		if (!Colision(1, 0, block)){
+			haBajado = true;
 			block.moveDown();
-			moveBlockToBackground();
-			validateBuffo(0,0);
 		}
+
 		return haBajado;
 	}
+
+	private void calculateFinGame(){
+		// Fin si el actual bloque no puede mover hacia abajo, o no existe bloque y el proximo generado no puede bajar
+		BloqueTetris b = BloqueTetris.getRandomBlock(bloquesUsados, bg);
+		if(block == null && Colision(1, 0, b)) finGame = true;
+	}
+
 
 	 /**
 	 * Valida que el bloque tenga colision con otros bloques
 	 * @return si choca con otros bloques
 	 */
-	private boolean Colision(int y, int x) {
-		int[][] coords = block.getCoordenadas();
+	public boolean Colision(int y, int x, BloqueTetris b) {
+		int[][] coords = b.getCoordenadas();
 		for(int[] c : coords) {
 
 			if (c[1] + y < 0) continue;
 			// Cuando las siguientes casillas son de otro color, y ese otro color no hace parte del bloque
-			if(!Objects.equals(background[c[1] + y][c[0] + x], bg) &&
-					Arrays.stream(coords).noneMatch(co -> co[0] == c[0] + x && co[1] == c[1] + y))
+			if(c[1] + y >= background.length ||
+					(!Objects.equals(background[c[1] + y][c[0] + x], bg) &&
+					Arrays.stream(coords).noneMatch(co -> co[0] == c[0] + x && co[1] == c[1] + y)))
 				return true;
 		}
 		return false;
@@ -185,7 +175,7 @@ public class Tablero implements Serializable{
 	 * Valida si la figura ya llego al final del tablero
 	 * @return si la figura ya llego al final del tablero
 	 */
-	private boolean isFinalTablero() {
+	public boolean isFinalTablero() {
 		return block.getY() + block.getHeight() == filas;
 	}
 	
@@ -193,9 +183,9 @@ public class Tablero implements Serializable{
 	 * Mueve el bloque a la derecha si es posible
 	 *
 	 */
-	public boolean moveBlockRight() throws TetrisException{
+	private boolean moveBlockRight() throws TetrisException{
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
-		if(block.getX() + block.getWidth() < cols && !Colision(0,1)){
+		if(block.getX() + block.getWidth() < cols && !Colision(0,1, this.block)){
 			validateBuffo(1,0);
 			block.moveRight();
 			return true;
@@ -203,19 +193,53 @@ public class Tablero implements Serializable{
 		return false;
 
 	}
+
+	public synchronized boolean moveBlock(String movement) throws TetrisException{
+		// Si no ha acabado el juego, ver si se debe instanciar un bloque
+		boolean moved = false;
+		if (!finGame){
+			if (block == null) spawnBlock();
+			removeBlockFromBackground();
+			switch (movement.toUpperCase()){
+				case "DOWN":
+					moved = moveBlockDown();
+					if (!moved){
+						moveBlockToBackground();
+						block = null;
+					}
+					break;
+				case "UP":
+					moved = rotarBlock();
+					break;
+				case "LEFT":
+					moved = moveBlockLeft();
+					break;
+				case "RIGHT":
+					moved = moveBlockRight();
+					break;
+			}
+			if (moved) moveBlockToBackground();
+			else calculatePuntuacion();
+			calculateFinGame();
+		}
+
+
+
+		return moved;
+	}
 	
 	/**
 	 * Mueve el bloque a la izquierda si es posible
 	 *
 	 */
-	public boolean moveBlockLeft() throws TetrisException {
+	private boolean moveBlockLeft() throws TetrisException {
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
-			if(block.getX() -1 >= 0 && !Colision(0,-1)){
-				validateBuffo(-1,0);
-				block.moveLeft();
-				return true;
-			}
-			return false;
+		if(block.getX() -1 >= 0 && !Colision(0,-1, this.block)){
+			validateBuffo(-1,0);
+			block.moveLeft();
+			return true;
+		}
+		return false;
 
 	}
 	
@@ -304,12 +328,15 @@ public class Tablero implements Serializable{
 	/**
 	 * Se encarga de rotar la ficha 
 	 */
-	public void rotarBlock() throws TetrisException {
+	public boolean rotarBlock() throws TetrisException {
+
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
-			if(isRotable()) {
-				block.rotar(this);
-				validateBuffo(0,0);				
-			}
+		if(isRotable()) {
+			block.rotar(this);
+			validateBuffo(0,0);
+			return true;
+		}
+		return false;
 	} 
 	/**
 	 * Valida que el tetromino se pueda rotar
@@ -357,36 +384,12 @@ public class Tablero implements Serializable{
 			try {
 				background[coord[1]][coord[0]] = bg;
 				bgReborde[coord[1]][coord[0]] = null;
-			}catch(Exception e) {
-				continue;
-			}
+			}catch(Exception e) {}
 		}							
-	}
-
-
-
-	 /**
-	 * Realiza las operaciones pertinentes leugo de que cae el tetromino
-	 * @return si se termino el juego
-	 */
-	public boolean acaboGame() {
-		boolean ok = false;
-		try {
-			if (block.modifyShape()) block.findIdealForm(block.traducir(this, bg), this, bg);
-			moveBlockToBackground();
-			if (block.borrarCercanos()) updateCuadrosLaterales();
-		} catch (Exception e) {
-			ok = true;
-			Log.registre(e);
-		}
-		addPuntuacion(clearLines());
-		block = null;
-		return ok;
 	}
 	
 	public void addPuntuacion(int linesCleared) {
 		puntuacion.set(puntuacion.get() + (linesCleared*10));
-		puntuacion.set(clearLines());
 	}
 	
 	/** Modifica la velocidad de caida de los bloques si el modo de juego es acelerado
