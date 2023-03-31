@@ -18,6 +18,7 @@ import javax.websocket.server.ServerEndpoint;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
 import edu.eci.arsw.services.LobbyService;
+import edu.eci.arsw.services.SessionService;
 import edu.eci.arsw.shared.TetrisException;
 import edu.eci.arsw.threads.GameSession;
 
@@ -38,7 +39,7 @@ public class GameSocket {
             Lobby l = lobbyService.get(codigo);
 
             // if doesnt throws, the sessions is completed
-            Map<String, Session> lobbySessions = GameSession.getSessions(l, sessions, true);
+            Map<String, Session> lobbySessions = SessionService.getSessions(l, sessions, true);
             GameSession game = new GameSession(l, lobbySessions, lobbyService);
             game.start();
             games.add(game);
