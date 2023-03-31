@@ -1,17 +1,19 @@
 package edu.eci.arsw.threads;
 
-import com.google.gson.Gson;
-import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.models.player.Player;
-import edu.eci.arsw.services.LobbyService;
-import edu.eci.arsw.shared.TetrisException;
-
-import javax.websocket.Session;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.websocket.Session;
+
+import com.google.gson.Gson;
+
+import edu.eci.arsw.models.Lobby;
+import edu.eci.arsw.models.player.Player;
+import edu.eci.arsw.services.LobbyService;
+import edu.eci.arsw.shared.TetrisException;
 
 public class GameSession extends Thread{
     private static final Gson gson = new Gson();
@@ -34,18 +36,19 @@ public class GameSession extends Thread{
     }
 
     /**
-     * Filtra dentro de allSessions las sesiones correspondientes a los miembros del lobby
+     * Filtra dentro de allSessions las sesiones correspondientes a los miembros del lobby.
      * @param lobby lobby
      * @param allSessions Todas las sesiones del websocket
+     * @param throwing si es verdadero, generará excepción si en el map de sesiones no están todos los usuarios
      * @return sesiones de integrantes del lobby
      */
-    public static Map<String, Session> getSessions(Lobby lobby, Map<String, Session> allSessions) throws TetrisException {
+    public static Map<String, Session> getSessions(Lobby lobby, Map<String, Session> allSessions, boolean throwing) throws TetrisException {
         Map<String, Session> session = new ConcurrentHashMap<>();
 
         for (Player p: lobby.getPlayers()) {
             Session aux = allSessions.get(p.getNick());
-            if (aux == null) throw new TetrisException(TetrisException.INVALID_SESSION);
-            session.put(p.getNick(), aux);
+            if (aux != null) session.put(p.getNick(), aux);
+            else if (throwing) throw new TetrisException(TetrisException.INVALID_SESSION);
         }
         return session;
     }

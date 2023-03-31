@@ -1,10 +1,7 @@
 package edu.eci.arsw.websockets;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.websocket.OnClose;
@@ -15,17 +12,18 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import com.google.gson.Gson;
+
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.shared.TetrisException;
 import edu.eci.arsw.threads.GameSession;
 
-@ServerEndpoint(value ="/game/{username}/{codigo}")
+@ServerEndpoint(value ="/lobby/{username}/{codigo}")
 @ApplicationScoped
-public class GameSocket {
-
-    List<GameSession> games = new ArrayList<>();
+public class LobbySocket {
+    private static final Gson gson = new Gson();
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
@@ -35,41 +33,34 @@ public class GameSocket {
     public void onOpen(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo){
         try{
             sessions.put(username, session);
-            Lobby l = lobbyService.get(codigo);
-
-            // if doesnt throws, the sessions is completed
-            Map<String, Session> lobbySessions = GameSession.getSessions(l, sessions, true);
-            GameSession game = new GameSession(l, lobbySessions, lobbyService);
-            game.start();
-            games.add(game);
-        }catch (TetrisException e){
-            System.out.println("Aún faltan jugadores para empezar la partida o no existe el lobby ");
-        }
+            System.out.println("=====================");
+            Lobby l = lobbyService.addPlayer(username, codigo);
+            System.out.println(sessions.size());
+            Map<String, Session> lobbySessions = GameSession.getSessions(l, sessions, false);
+            System.out.println(lobbySessions.size());
+            
+            broadcast(gson.toJson(l), lobbySessions);
+        }catch (TetrisException ignored){}
 
 
     }
 
     @OnClose
     public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) {
-        sessions.remove(username);
-        broadcast("User " + username + " left");
     }
 
     @OnError
     public void onError(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo, Throwable throwable) {
-        GameSession gs =games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList()).get(0);
-        gs.dropUser(username);
+        System.out.println("Error" + throwable.getMessage());
     }
 
     @OnMessage
     public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo){
-        GameSession gs =games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList()).get(0);
-        gs.moveBlock(username, message);
 
     }
 
-    private void broadcast(String message) {
-        sessions.values().forEach(s -> {
+    private void broadcast(String message, Map<String, Session> sessionsLobby) {
+        sessionsLobby.values().forEach(s -> {
             s.getAsyncRemote().sendObject(message, result -> {
                 if (result.getException() != null) {
                     System.out.println("Unable to send message: " + result.getException());

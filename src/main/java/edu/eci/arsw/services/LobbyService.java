@@ -1,6 +1,7 @@
 package edu.eci.arsw.services;
 
 import edu.eci.arsw.models.Lobby;
+import edu.eci.arsw.models.player.Jugador;
 import edu.eci.arsw.persistence.lobby.ILobbyDAO;
 import edu.eci.arsw.shared.TetrisException;
 
@@ -18,5 +19,10 @@ public class LobbyService {
 
     public Lobby removePlayer(Lobby lobby, String user) {
         return this.lobbyDAO.removePlayer(lobby, user);
+    }
+
+    public Lobby addPlayer(String user, int codigo) throws TetrisException {
+        Jugador p = new Jugador(user, null);
+        return this.lobbyDAO.addPlayer(p, codigo);
     }
 }

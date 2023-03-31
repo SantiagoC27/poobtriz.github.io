@@ -2,8 +2,8 @@ package edu.eci.arsw.models.player;
 
 import java.io.Serializable;
 
-import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.BloqueTetris;
+import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.TetrisException;
 import lombok.Setter;
@@ -43,10 +43,6 @@ public abstract class Player implements Serializable {
 
 	public int getTiempo() {
 		return tablero.getTiempo();
-	}
-
-	public int  getNumBuffs() {
-		return tablero.getNumBuffs();
 	}
 
 	public void setVelocidad(int velInicial) {
