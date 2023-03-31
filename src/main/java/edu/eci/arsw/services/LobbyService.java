@@ -45,4 +45,8 @@ public class LobbyService {
     public Lobby get(int codigo) throws TetrisException{
         return this.lobbyDAO.get(codigo);
     }
+
+    public Lobby removePlayer(Lobby lobby, String user) {
+        return this.lobbyDAO.removePlayer(lobby, user);
+    }
 }

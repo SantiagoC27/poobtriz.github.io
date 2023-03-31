@@ -48,11 +48,11 @@ public class GameSocket {
 
             // if doesnt throws, the sessions is completed
             Map<String, Session> lobbySessions = GameSession.getSessions(l, sessions);
-            GameSession game = new GameSession(l, lobbySessions);
+            GameSession game = new GameSession(l, lobbySessions, lobbyService);
             game.start();
             games.add(game);
         }catch (TetrisException e){
-
+            System.out.println("Aún faltan jugadores para empezar la partida");
         }
 
 
@@ -66,9 +66,8 @@ public class GameSocket {
 
     @OnError
     public void onError(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo, Throwable throwable) {
-        sessions.remove(username);
-        LOG.error("onError", throwable);
-        broadcast("User " + username + " left on error: " + throwable);
+        GameSession gs =games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList()).get(0);
+        gs.dropUser(username);
     }
 
     @OnMessage

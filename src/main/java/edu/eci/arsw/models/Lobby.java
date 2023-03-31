@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 public class Lobby {
@@ -38,5 +39,9 @@ public class Lobby {
     public String toString(){
         return null;
 
+    }
+
+    public void removePlayer(String user) {
+        players.removeIf( p -> Objects.equals(p.getNick(), user));
     }
 }

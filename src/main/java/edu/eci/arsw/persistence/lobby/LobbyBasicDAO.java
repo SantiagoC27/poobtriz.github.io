@@ -16,4 +16,11 @@ public class LobbyBasicDAO implements  ILobbyDAO{
     public Lobby get(int codigo) {
         return l;
     }
+
+    @Override
+    public Lobby removePlayer(Lobby lobby, String user){
+        lobby.removePlayer(user);
+        return lobby;
+    }
 }
+
