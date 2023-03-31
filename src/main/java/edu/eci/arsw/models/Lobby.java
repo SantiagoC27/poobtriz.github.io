@@ -10,12 +10,12 @@ import java.util.Objects;
 
 @Getter
 public class Lobby {
-    private int codigo;
+    private final int codigo;
 
     @Setter
     private Estado estado;
 
-    private List<Player> players;
+    private final List<Player> players;
 
     public Lobby(int codigo){
         this.codigo = codigo;

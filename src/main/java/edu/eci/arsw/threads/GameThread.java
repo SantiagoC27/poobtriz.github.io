@@ -52,6 +52,7 @@ public class GameThread extends Thread{
                 throw new RuntimeException(e);
             }
         }
+        lobby.setEstado(Estado.FINISHED);
     }
 
 

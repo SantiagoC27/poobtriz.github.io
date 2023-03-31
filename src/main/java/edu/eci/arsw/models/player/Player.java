@@ -32,10 +32,6 @@ public abstract class Player implements Serializable {
 		return tablero.bgReborde[r][c];
 	}
 
-	public boolean isUniform() {
-		return Tablero.isUniforme();
-	}
-
 	public String getNick() {
 		return nick;
 	}

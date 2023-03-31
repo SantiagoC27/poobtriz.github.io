@@ -15,7 +15,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import com.google.gson.Gson;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
 import edu.eci.arsw.threads.GameSession;

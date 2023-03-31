@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.gson.annotations.Expose;
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
-import edu.eci.arsw.shared.Log;
 import edu.eci.arsw.shared.TetrisException;
 import lombok.Getter;
 
@@ -19,7 +18,6 @@ public class Tablero implements Serializable{
 	private final int filas;
 	private final int cols;
 	private Buffo buffo;
-	private int numBuffs;
 	public static List<Tablero> tableros = new ArrayList<>();
 
 	private final List<BloqueTetris> bloques;
@@ -52,7 +50,7 @@ public class Tablero implements Serializable{
 	}
 
 	/**
-	 * Llena con el color de ltablero todas las casillas
+	 * Llena con el color del tablero todas las casillas
 	 */
 	private void llenarMatriz() {
 		for(int r = 0; r < filas; r++) {
@@ -130,8 +128,12 @@ public class Tablero implements Serializable{
 		return haBajado;
 	}
 
+	/**
+	 * Actualiza la variable finGame. La logica es que si no hay un bloque, y si se genera otro que no puede bajar,
+	 * finGame = true
+	 */
+
 	private void calculateFinGame(){
-		// Fin si el actual bloque no puede mover hacia abajo, o no existe bloque y el proximo generado no puede bajar
 		BloqueTetris b = BloqueTetris.getRandomBlock(bloquesUsados, bg);
 		if(block == null && Colision(1, 0, b)) finGame = true;
 	}
@@ -163,20 +165,11 @@ public class Tablero implements Serializable{
 		TimerTask velDown = new TimerTask() {
 			public void run() {
 			if(tiempo % 10 == 0) {
-				alterarVelocidad();
 				updateBuffo();				
 			}
 			}
 		};
 		timer.schedule(velDown,1000,1000);
-	}
-
-	/**
-	 * Valida si la figura ya llego al final del tablero
-	 * @return si la figura ya llego al final del tablero
-	 */
-	public boolean isFinalTablero() {
-		return block.getY() + block.getHeight() == filas;
 	}
 	
 	/**
@@ -194,6 +187,12 @@ public class Tablero implements Serializable{
 
 	}
 
+	/**
+	 * Mueve el bloque y recalcula la puntuación
+	 * @param movement dirección del movimiento. ['UP', 'DOWN', 'LEFT', 'RIGHT']
+	 * @return Si se movió el bloque o no
+	 * @throws TetrisException si el bloque es nulo
+	 */
 	public synchronized boolean moveBlock(String movement) throws TetrisException{
 		// Si no ha acabado el juego, ver si se debe instanciar un bloque
 		boolean moved = false;
@@ -223,14 +222,11 @@ public class Tablero implements Serializable{
 			calculateFinGame();
 		}
 
-
-
 		return moved;
 	}
 	
 	/**
 	 * Mueve el bloque a la izquierda si es posible
-	 *
 	 */
 	private boolean moveBlockLeft() throws TetrisException {
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
@@ -253,7 +249,7 @@ public class Tablero implements Serializable{
 			for(int r = filas - 1; r >= 0; r--) {
 				lineFilled = true;
 				for(int c = 0; c < cols; c++) {
-					if(background[r][c] == bg) {
+					if(Objects.equals(background[r][c], bg)) {
 						lineFilled = false;
 						break;
 					}
@@ -351,8 +347,8 @@ public class Tablero implements Serializable{
 		int oldPos = b.getY();
 		for(int[] c :b.getCoordenadas()) {
 			if (c[1] < 0) continue;
-			if(oldPos == b.getY() && background[c[1]][c[0]] != bg) return false;
-			if(oldPos != b.getY() && background[c[1]+1][c[0]] != bg) return false;			
+			if(oldPos == b.getY() && !Objects.equals(background[c[1]][c[0]], bg)) return false;
+			if(oldPos != b.getY() && !Objects.equals(background[c[1] + 1][c[0]], bg)) return false;
 		}
 	
 		return true;
@@ -384,22 +380,12 @@ public class Tablero implements Serializable{
 			try {
 				background[coord[1]][coord[0]] = bg;
 				bgReborde[coord[1]][coord[0]] = null;
-			}catch(Exception e) {}
+			}catch(Exception ignored) {}
 		}							
 	}
 	
 	public void addPuntuacion(int linesCleared) {
 		puntuacion.set(puntuacion.get() + (linesCleared*10));
-	}
-	
-	/** Modifica la velocidad de caida de los bloques si el modo de juego es acelerado
-	 *
-	 */
-
-	private void alterarVelocidad() {
-		if(tiempo != 0 && !uniforme && velocidad - disminucionVel > 0) {
-			velocidad -= disminucionVel;
-		}
 	}
 
 
@@ -420,16 +406,16 @@ public class Tablero implements Serializable{
 		int[] nums = new int[cols];
 		int pos = 0;
 		for(int j = 0; j < cols; j++)
-			if(background[n][j] == bg) {
+			if(Objects.equals(background[n][j], bg)) {
 				nums[pos] = j;
 				pos++;
 			}
 		return nums;
 	}
 
- /**
- * Valida que el buffo se active en la posicion indicada
- */
+	 /**
+	 * Valida que el buffo se active en la posicion indicada
+	 */
 
 	public void validateBuffo(int x, int y) {
 		// Ver la posicion del buffo
@@ -445,12 +431,6 @@ public class Tablero implements Serializable{
 		}
 	}
 
-
-	public static boolean isUniforme() {
-		return uniforme;
-	}
-
-	
 	public void setMovilidadBlock(boolean p) {
 		if(block != null) block.setMovilidad(p);
 	}
@@ -464,27 +444,14 @@ public class Tablero implements Serializable{
 	}
 
 	public int getTiempo() {
-		return (int) tiempo;
-	}
-
-
-	 /**
-	 * Genera una lista de buffos a usar en base al numero de buffos indicado
-	 * @param buffs numero de buffos
-	 */
-	public static void prepareBuffos(int buffs) {
-		for(Tablero t :tableros) {
-			t.numBuffs = buffs;			
-		}
-		Buffo.prepareBuffos(buffs);
-		
+		return tiempo;
 	}
 
 	/*
 	 * Validar que no queden huecos debajo de la penultima fila
 	 */
 	private boolean quedaraHueco(int[] c, BloqueTetris bloq) {
-		if(background[c[1]+1][c[0]+1] != bg && background[c[1]+1][c[0]] == bg) {
+		if(!Objects.equals(background[c[1] + 1][c[0] + 1], bg) && Objects.equals(background[c[1] + 1][c[0]], bg)) {
 			for(int[] co :bloq.getCoordenadas()) {
 				if(co[0] == c[0] && co[1] == c[1]+1) return false;
 			}

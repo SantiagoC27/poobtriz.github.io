@@ -7,7 +7,6 @@ import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.shared.TetrisException;
 
 import javax.websocket.Session;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,9 @@ public class GameSession extends Thread{
     private final LobbyService lobbyService;
 
     private Lobby lobby;
-    private  Map<String, Session> sessions;
+    private final Map<String, Session> sessions;
 
-    private GameThread gt;
+    private final GameThread gt;
 
     private final AtomicBoolean playersMoved;
 
@@ -60,6 +59,7 @@ public class GameSession extends Thread{
                 broadcast();
             }
         }
+
     }
 
     public void moveBlock(String user, String movement){
@@ -82,6 +82,11 @@ public class GameSession extends Thread{
         }));
         failed.forEach(this::dropUser);
     }
+
+    /**
+     * Eliminar un usuario del juego
+     * @param user usuario
+     */
 
     public void dropUser(String user){
         sessions.remove(user);
