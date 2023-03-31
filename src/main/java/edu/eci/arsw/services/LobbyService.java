@@ -42,7 +42,7 @@ public class LobbyService {
         return true;
     }
 
-    public Lobby get(int codigo) {
+    public Lobby get(int codigo) throws TetrisException{
         return this.lobbyDAO.get(codigo);
     }
 }

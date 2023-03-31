@@ -2,6 +2,7 @@ package edu.eci.arsw.models;
 
 import edu.eci.arsw.models.player.Player;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 public class Lobby {
     private int codigo;
 
+    @Setter
     private Estado estado;
 
     private List<Player> players;

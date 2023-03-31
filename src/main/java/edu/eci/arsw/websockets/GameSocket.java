@@ -1,7 +1,6 @@
 package edu.eci.arsw.websockets;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,11 +18,12 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gson.Gson;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
+import edu.eci.arsw.threads.GameSession;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.TetrisService;
+import edu.eci.arsw.shared.TetrisException;
 import edu.eci.arsw.threads.GameThread;
 import org.jboss.logging.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @ServerEndpoint(value ="/game/{username}/{codigo}")
 @ApplicationScoped
@@ -32,7 +32,7 @@ public class GameSocket {
     private static final Gson GSON = new Gson();
     private static final Logger LOG = Logger.getLogger(GameSocket.class);
 
-    List<GameThread> games = new ArrayList<>();
+    List<GameSession> games = new ArrayList<>();
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
@@ -42,15 +42,17 @@ public class GameSocket {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo){
-        //TODO Si el usuario es admin de la sala, iniciar el juego.
-        sessions.put(username, session);
-        if (lobbyService.isAdmin(username, codigo)){
+        try{
+            sessions.put(username, session);
             Lobby l = lobbyService.get(codigo);
-            try{
-                GameThread gt =new GameThread(l, sessions);
-                gt.start();
-                games.add(gt);
-            }catch (Exception e){ e.printStackTrace();}
+
+            // if doesnt throws, the sessions is completed
+            Map<String, Session> lobbySessions = GameSession.getSessions(l, sessions);
+            GameSession game = new GameSession(l, lobbySessions);
+            game.start();
+            games.add(game);
+        }catch (TetrisException e){
+
         }
 
 
@@ -71,8 +73,8 @@ public class GameSocket {
 
     @OnMessage
     public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo){
-        GameThread gt =games.stream().filter( t -> t.getCodigo() == codigo).collect(Collectors.toList()).get(0);
-        gt.moveBlock(username, message);
+        GameSession gs =games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList()).get(0);
+        gs.moveBlock(username, message);
 
     }
 
