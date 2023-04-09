@@ -15,4 +15,28 @@ public class Lobby {
         this.estado = Estado.CREATED;
         this.players = new ArrayList<>();
     }
+
+    public int getCode() {
+        return codigo;
+    }
+
+    public void setCode(int codigo) {
+        this.codigo = codigo;
+    }
+
+    public Estado getStatus() {
+        return estado;
+    }
+
+    public void setStatus(Estado estado) {
+        this.estado = estado;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
 }

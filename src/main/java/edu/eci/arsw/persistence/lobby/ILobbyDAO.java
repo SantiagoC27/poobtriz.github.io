@@ -4,4 +4,5 @@ import edu.eci.arsw.models.Lobby;
 
 public interface ILobbyDAO {
     Lobby get(Lobby lobby);
+    void create(Lobby lobby);
 }
