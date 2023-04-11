@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
 import edu.eci.arsw.services.LobbyService;
+import edu.eci.arsw.services.SessionService;
 import edu.eci.arsw.shared.TetrisException;
 import edu.eci.arsw.threads.GameSession;
 
@@ -33,11 +34,8 @@ public class LobbySocket {
     public void onOpen(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo){
         try{
             sessions.put(username, session);
-            System.out.println("=====================");
             Lobby l = lobbyService.addPlayer(username, codigo);
-            System.out.println(sessions.size());
-            Map<String, Session> lobbySessions = GameSession.getSessions(l, sessions, false);
-            System.out.println(lobbySessions.size());
+            Map<String, Session> lobbySessions = SessionService.getSessions(l, sessions, false);
             
             broadcast(gson.toJson(l), lobbySessions);
         }catch (TetrisException ignored){}
