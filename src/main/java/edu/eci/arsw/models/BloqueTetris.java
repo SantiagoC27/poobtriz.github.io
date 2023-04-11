@@ -1,41 +1,38 @@
 package edu.eci.arsw.models;
 
-import java.awt.Color;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import edu.eci.arsw.shared.Log;
 import edu.eci.arsw.models.rebordes.Reborde;
+import lombok.Getter;
 
+@Getter
 public class BloqueTetris implements Cloneable, Serializable {
 	//C, L, LINE, T, Z
 	public static int[][][] formas ={{{1,1}, {1,1}}, {{1,0}, {1,0}, {1,1}}, {{1,1,1,1}},
 									{{1,1,1}, {0,1,0}}, {{1,1,0}, {0,1,1}} };
-	public static Color[] colores= {Color.yellow, Color.CYAN, Color.blue, Color.pink, Color.ORANGE};
+	public static String[] colores= {"magenta", "blue", "pink", "orange", "indigo"};
 	private final static List<BloqueTetris> bloquesShared = new ArrayList<>();
 	private int[][] shape;
 	
-	private final Color color;
+	private final String color;
 	private int x, y;
 	protected int[][][] rotaciones;
 	private int currentRotation;
-	private Reborde reborde = Reborde.randomReborde();
+	private final Reborde reborde;
 	private boolean isMovible = true;
 	private final int currentForm;
 	
 	
-	public BloqueTetris(int[][] shape, Reborde r, Color c, int cu) {
+	public BloqueTetris(int[][] shape, Reborde r, String c, int cu) {
 		this.reborde = r;
 		this.shape = shape;
 		this.color = c;
 		this.currentForm = cu;
 		crearRotaciones();
 	}
-	
+
 
 	public int getForm() {
 		return currentForm;
@@ -47,7 +44,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 */
 	public void spawn(int girdWidth) {
 		y = -getHeight();
-		x = (girdWidth - getWidth()) / 2;
+		x = girdWidth / 2;
 	}
 
 	
@@ -63,13 +60,9 @@ public class BloqueTetris implements Cloneable, Serializable {
 		x++;
 	}
 	
-	public int getFinalTablero() {
-		return y + getHeight();
-	}
-	
 	public void setPos(int X,int Y) {
 		x = X;
-		y = Y;	
+		y = Y;
 	}
 	
 	public int getCurrentRot() {
@@ -118,8 +111,8 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 /**
 	 * Usa alguna de las rotaciones disponibles de la ficha
 	 */
-	public void rotar() {
-		if(isRotable()) {
+	public void rotar(Tablero t) {
+		if(isRotable(t)) {
 			setShape();
 		}
 	}
@@ -127,12 +120,11 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 /**
 	 * Valida si la ficha se peude rotar correctamente con respecto al tablero y a otras fichas
 	 */
-	private boolean isRotable() {
+	private boolean isRotable(Tablero t) {
 		int aux;
 		if(currentRotation > 3) aux = 0; else aux = currentRotation; 
 		int[][] next = rotaciones[aux];
-		if(x + next[0].length <= Tablero.cols && y + next.length < Tablero.filas) return true;
-		return false;
+		return x + next[0].length <= t.getCols() && y + next.length < t.getFilas();
 	}
 	
 	public BloqueTetris Clone(){
@@ -150,20 +142,17 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 
 	 /**
-	 * Retorna las coordenas en las que se encuentra la ficha de la forma x,y
+	 * Retorna las coordenas en las que se encuentra la ficha de la forma x,y. Excluye coordenadas negativas
 	 * @return las coordenadas
 	 */
 	public int[][] getCoordenadas() {
 		int cont = 0;
 		int[][] posiciones = new int[4][];
-		int[] aux;	
+
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
 				if(shape[r][c] == 1) {
-					aux = new int[2];
-					aux[0] = c + x;
-					if(r + y < 0) aux[1] = 0; else aux[1] = r + y;
-					posiciones[cont] = aux;
+					posiciones[cont] = new int[]{c + x, r + y};
 					cont++;
 				}
 			}
@@ -178,63 +167,41 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public int[][] getCoordenadasCercanas() {
 		int[][] posiciones = new int[16][2];
 		int cont = 0;
-		int[] aux;
 		for(int[] c :this.getCoordenadas()) {
-			aux = new int[2];
-			aux[0] = c[0]-1;
-			aux[1] = c[1];
-			posiciones[cont] = aux;
-			cont++;
-			aux = new int[2];
-			aux[0] = c[0]+1;
-			aux[1] = c[1];
-			posiciones[cont] = aux;
-			cont++;
-			aux = new int[2];
-			aux[0] = c[0];
-			aux[1] = c[1]+1;
-			posiciones[cont] = aux;
-			cont++;
-			aux = new int[2];
-			aux[0] = c[0];
-			aux[1] = c[1];
-			posiciones[cont] = aux;
+			posiciones[cont] = new int[]{c[0]-1, c[1]};
+			posiciones[cont+1] = new int[]{c[0]+1, c[1]};
+			posiciones[cont+2] = new int[]{c[0], c[1]+1};
+			posiciones[cont+3] = new int[]{c[0], c[1]-1};
+			posiciones[cont+4] = new int[]{c[0], c[1]};
+			cont += 4;
 			cont++;
 		}
 		return posiciones;
 	}
 
-	
-	public int getLeftEdge() {return x;}
-	public int getRigthEdge() {return x + getWidth();}
-
 	/**
 	 * Genera un bloque de tetris aleatorio en forma color y reborde
 	 */
-	private static BloqueTetris selectRandomBlock() {
-		int n = new Random().nextInt(formas.length);   
-		Reborde r = Reborde.randomReborde();	
-		BloqueTetris b = new BloqueTetris(formas[n],r, colores[n], n);
-		return b;
+	private static BloqueTetris selectRandomBlock(String bg) {
+		int n = new Random().nextInt(formas.length);
+		if (Objects.equals(colores[n], bg)) return selectRandomBlock(bg);
+		Reborde r = Reborde.randomReborde();
+		return new BloqueTetris(formas[n],r, colores[n], n);
 	}
 
 
 	 /**
 	 * Toma un bloque del arreglo de bloques
 	 * @param pos de la cualse quiere tomar
+	  * @param bg Color que no puede ser tomado
 	 * @return el bloque
 	 */
-	public static BloqueTetris getRandomBlock(int pos) {//======>==================================== meter la secuencia q me salio
+	public static BloqueTetris getRandomBlock(int pos, String bg) {//======>==================================== meter la secuencia q me salio
 			while(pos >= bloquesShared.size()) {
-				BloqueTetris bloqueAleatorio = selectRandomBlock();
+				BloqueTetris bloqueAleatorio = selectRandomBlock(bg);
 				bloquesShared.add(bloqueAleatorio);				
 			}
-		
 		return  bloquesShared.get(pos).Clone();
-	}
-	
-	public int[][] getShape(){
-		return shape;
 	}
 	
 	private void setShape() {
@@ -249,29 +216,22 @@ public class BloqueTetris implements Cloneable, Serializable {
 			currentRotation = pos+1;			
 		}		
 	}
-	
-	public Color getColor() {
-		return color;
-	}
-	
-	public Reborde getReborde() {
-		return reborde;
-	}
-	
+
+
+	/**
+	 *
+	 * @return La posición en Y de la pieza desde su posición superior izquierda
+	 */
 	public int getHeight() {
 		return shape.length;
 	}
-	
+
+	/**
+	 *
+	 * @return La posición en X de la pieza desde su posición superior izquierda
+	 */
 	public int 	getWidth() {
 		return shape[0].length;
-	}
-	
-	public int getX() {
-		return x;
-	}
-	
-	public int getY() {
-		return y;
 	}
 
 
@@ -309,7 +269,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	}
 	
 	
-	public void findIdealForm(int[][] data, Color[][] bg, Color col) {
+	public void findIdealForm(int[][] data, Tablero t, String col) {
 		int indx = 0;
 		double[][] dataForms = new double[formas.length*4][3];
 		
@@ -322,17 +282,17 @@ public class BloqueTetris implements Cloneable, Serializable {
 			}
 		}
 		calculateBestRotacion(dataForms);
-		while(isBajable(bg, col)) moveDown();
+		while(isBajable(t, col)) moveDown();
 		
 		
 		
 	}
 
-	private boolean isBajable(Color[][] bg, Color col) {//get downest squares, por cada coord de ellos, si hay algo all�
-		for(int[] co :this.getDownsetSquares()) {
+	private boolean isBajable(Tablero t, String col) {//get downest squares, por cada coord de ellos, si hay algo all�
+		for(int[] co :this.getDownsetSquares(t)) {
 			try {
 				//Si abajo esta vacio, mover abajo
-				if( bg[co[1]+1][co[0]] != col) return false;	
+				if(!Objects.equals(t.getBackground()[co[1] + 1][co[0]], col)) return false;
 			}catch(Exception e) {
 				return false;
 				}
@@ -340,12 +300,12 @@ public class BloqueTetris implements Cloneable, Serializable {
 		return true;
 	}
 
-	private int[][] getDownsetSquares() {
+	private int[][] getDownsetSquares(Tablero t) {
 		int[][] coords = new int[getWidth()][2];
 		int pos = 0;
 		for(int c = 0; c < getWidth(); c++) {
 			for(int r = getHeight()-1; r >= 0 ; r--) {
-				if(shape[r][c] == 1 && r+ y < Tablero.filas && x + c< Tablero.cols) {
+				if(shape[r][c] == 1 && r+ y < t.getFilas() && x + c< t.getCols()) {
 					int[] aux = {c+x,r+y};
 					coords[pos] =  aux;
 					pos++;
@@ -432,13 +392,13 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 * 1 si ahi puede caber una ficha, 0 si no.
 	 */
 
-	public int[][] traducir(Color[][] bg, Color col) {
+	public int[][] traducir(Tablero t, String col) {
 		int[][] rta = new int[5][];
 		int cont = 0;
-		for(int i = y; i < Tablero.filas && i < y + 4; i++) {
-			int[] aux = new int[Tablero.cols-x];
-			for(int j =x; j < Tablero.cols && j <x + 4; j++) {
-				if(bg[i][j] == col) aux[j-x] = 1;  else aux[j-x] = 0;	
+		for(int i = y; i < t.getFilas() && i < y + 4; i++) {
+			int[] aux = new int[t.getCols()-x];
+			for(int j =x; j < t.getCols() && j <x + 4; j++) {
+				if(Objects.equals(t.getBackground()[i][j], col)) aux[j-x] = 1;  else aux[j-x] = 0;
 			}
 			rta[cont] = aux;
 			cont++;

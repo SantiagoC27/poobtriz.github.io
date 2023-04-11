@@ -1,6 +1,5 @@
 package edu.eci.arsw.models.buffos;
 
-import java.awt.Color;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,7 +9,7 @@ public class BuffoS extends Buffo{
 
 	public BuffoS(int[] c) {
 		super(c);
-		super.c = Color.green;
+		super.color = "green";
 	}
 	
 	@Override
