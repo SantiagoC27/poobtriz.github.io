@@ -8,6 +8,9 @@ import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
 import edu.eci.arsw.shared.TetrisException;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 @Service
 public class LobbyBasicDAO implements  ILobbyDAO{
 
@@ -29,7 +32,10 @@ public class LobbyBasicDAO implements  ILobbyDAO{
     @Override
     public Lobby addPlayer(Jugador p, int codigo) throws TetrisException{
         Lobby lobby = get(codigo);
-        lobby.addPlayer(p);
+        if(lobby.getPlayers().stream().filter(x -> Objects.equals(x.getNick(), p.getNick())).collect(Collectors.toList()).size() == 0)
+        {
+            lobby.addPlayer(p);
+        }
         return lobby;
     }
 }
