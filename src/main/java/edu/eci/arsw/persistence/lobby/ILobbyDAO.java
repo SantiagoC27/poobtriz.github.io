@@ -10,4 +10,6 @@ public interface ILobbyDAO {
     Lobby removePlayer(Lobby lobby, String user);
 
     Lobby addPlayer(Jugador p, int codigo) throws TetrisException;
+
+    void create(Lobby lobby);
 }

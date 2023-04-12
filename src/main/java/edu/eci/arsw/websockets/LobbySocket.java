@@ -15,7 +15,7 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gson.Gson;
 
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.persistence.lobby.LobbyBasicDAO;
+import edu.eci.arsw.persistence.impl.InMemoryLobbyDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.SessionService;
 import edu.eci.arsw.shared.TetrisException;
@@ -28,7 +28,7 @@ public class LobbySocket {
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    private final LobbyService lobbyService = new LobbyService(new LobbyBasicDAO());
+    private final LobbyService lobbyService = new LobbyService(new InMemoryLobbyDAO());
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo){

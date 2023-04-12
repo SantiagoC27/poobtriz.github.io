@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Getter
 public class Lobby {
-    private final int codigo;
+    private int codigo;
 
     @Setter
     private Estado estado;
@@ -23,10 +23,30 @@ public class Lobby {
         this.players = new ArrayList<>();
     }
 
+    public int getCode() {
+        return codigo;
+    }
+
+    public void setCode(int codigo) {
+        this.codigo = codigo;
+    }
+
+    public Estado getStatus() {
+        return estado;
+    }
+
+    public void setStatus(Estado estado) {
+        this.estado = estado;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
     public void addPlayer(Player p){
         this.players.add(p);
     }
-
+    
     public boolean endGame(){
         boolean finished = true;
         for (Player p : players) {
@@ -44,4 +64,9 @@ public class Lobby {
     public void removePlayer(String user) {
         players.removeIf( p -> Objects.equals(p.getNick(), user));
     }
+
+    public void removePlayer(int index) {
+        players.remove(index);
+    }
+
 }
