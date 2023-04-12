@@ -12,10 +12,7 @@ public class TetrisException extends Exception
     {
         super(_message);
     }
-    
-    public final static String BLOCK_NULL = "No hay bloque";
-	public static final String END_TABLERO = "La figura ha llegado al final del tablero";
-	public static final String PROBLEM_SAVE_FILE = "Hubo un problema al guardar el juego";
-	public static final String PROBLEM_OPEN_FILE = "Hubo un problema al abrir el juego";
-	public static final String INVALID_USER = "El usuario no existe, por favor digite un user valido";
+    public static final String INVALID_SESSION = "La sesión no tiene a los integrantes del lobby";
+    public static final String BLOCK_NULL = "No se puede generar el movimiento porque el bloque está nulo";
+
 }

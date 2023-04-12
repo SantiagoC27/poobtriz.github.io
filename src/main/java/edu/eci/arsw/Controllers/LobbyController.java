@@ -27,7 +27,6 @@ public class LobbyController {
         if (lobby.getPlayers().size() < 1) {
             throw new WebApplicationException("Debe haber al menos un jugador en el lobby", 400);
         }
-        //Falta establecer el administrador
         dao.create(lobby);
         return lobby;
     }

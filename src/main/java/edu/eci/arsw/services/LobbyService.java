@@ -1,33 +1,28 @@
 package edu.eci.arsw.services;
 
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
+import edu.eci.arsw.persistence.lobby.ILobbyDAO;
 import edu.eci.arsw.shared.TetrisException;
 
 public class LobbyService {
 
-    public Lobby createLobby(Admin admin){
-        return null;
+    private final ILobbyDAO lobbyDAO;
+
+    public LobbyService(ILobbyDAO lobbyDAO){
+        this.lobbyDAO = lobbyDAO;
     }
 
-    /**
-     * Agrega a newUser al lobby con el código elegido
-     * @param newUser
-     * @param codigo
-     * @throws TetrisException si la sala no existe
-     */
-    public void joinLobby(Jugador newUser, int codigo) throws TetrisException {
-
+    public Lobby get(int codigo) throws TetrisException{
+        return this.lobbyDAO.get(codigo);
     }
 
-    /**
-     * Borra en el back la sala y todos los datos relacionada a esta
-     * @param lobby
-     */
-
-    public void endLobby(Lobby lobby, Admin admin ){
-
+    public Lobby removePlayer(Lobby lobby, String user) {
+        return this.lobbyDAO.removePlayer(lobby, user);
     }
 
+    public Lobby addPlayer(String user, int codigo) throws TetrisException {
+        Jugador p = new Jugador(user, null);
+        return this.lobbyDAO.addPlayer(p, codigo);
+    }
 }
