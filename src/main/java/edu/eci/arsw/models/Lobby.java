@@ -1,14 +1,21 @@
 package edu.eci.arsw.models;
 
 import edu.eci.arsw.models.player.Player;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+@Getter
 public class Lobby {
     private int codigo;
+
+    @Setter
     private Estado estado;
-    private List<Player> players;
+
+    private final List<Player> players;
 
     public Lobby(int codigo){
         this.codigo = codigo;
@@ -36,7 +43,30 @@ public class Lobby {
         return players;
     }
 
-    public void setPlayers(List<Player> players) {
-        this.players = players;
+    public void addPlayer(Player p){
+        this.players.add(p);
     }
+    
+    public boolean endGame(){
+        boolean finished = true;
+        for (Player p : players) {
+            if(!p.hasFinished()) finished = false;
+        }
+        return finished;
+    }
+
+    @Override
+    public String toString(){
+        return null;
+
+    }
+
+    public void removePlayer(String user) {
+        players.removeIf( p -> Objects.equals(p.getNick(), user));
+    }
+
+    public void removePlayer(int index) {
+        players.remove(index);
+    }
+
 }

@@ -1,74 +1,64 @@
 package edu.eci.arsw.models.player;
 
-import java.awt.Color;
-import java.awt.event.KeyListener;
 import java.io.Serializable;
 
-import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.BloqueTetris;
+import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.rebordes.Reborde;
+import edu.eci.arsw.shared.TetrisException;
+import lombok.Setter;
+
 
 public abstract class Player implements Serializable {
 	private final String nick;
-	protected Tablero t;
-	
+	@Setter
+	protected Tablero tablero;
+
 	public Player(String name, Tablero t) {
 		this.nick = name;
-		this.t = t;
+		this.tablero = t;
+	}
+
+	public Player(String name){
+		this.nick = name;
+		this.tablero = null;
 	}
 
 	public BloqueTetris getBlock() {
-		return t.getBlock();
-	}
-	
-	public Color getColorBg(int r, int c){
-		return t.background[r][c];
-	}
-
-	public Color getColorBg() {
-		return t.getBg();
-	}
-
-	public boolean isAlive() {
-		return t.isAlive();
+		return tablero.getBlock();
 	}
 
 	public Reborde getRebordeBg(int r, int c) {
-		return t.bgReborde[r][c];
+		return tablero.bgReborde[r][c];
 	}
 
-	public boolean isUniform() {
-		return Tablero.isUniforme();
-	}
-	
 	public String getNick() {
 		return nick;
 	}
 
-	
+
 	public int getPuntuacionBLoq() {
-		return t.getPuntuacionBloques();
+		return tablero.getPuntuacionBloques();
 	}
 
 	public int getTiempo() {
-		return t.getTiempo();
-	}
-
-	public void end() {
-		t.interrupt();
-		
-	}
-	
-	public int  getNumBuffs() {
-		return t.getNumBuffs();
+		return tablero.getTiempo();
 	}
 
 	public void setVelocidad(int velInicial) {
-		t.setVelocidad(velInicial);
-		
+		tablero.setVelocidad(velInicial);
 	}
-	
-	public Tablero getTablero() {
-		return t;
+
+	public boolean moveBlock(String movement) throws TetrisException {
+		return tablero.moveBlock(movement.toUpperCase());
 	}
+
+	public void calculatePuntuacion(){
+		tablero.calculatePuntuacion();
+	}
+
+	public boolean hasFinished() {
+		return tablero.hasFinished();
+	}
+
 }

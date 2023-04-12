@@ -1,14 +1,12 @@
 package edu.eci.arsw.models.buffos;
 
-import java.awt.Color;
-
 import edu.eci.arsw.models.Tablero;
 
 public class BuffoSD extends Buffo{
 	
 	public BuffoSD(int[] c) {
 		super(c);
-		super.c = Color.magenta;
+		super.color = "magenta";
 	}
 
 	
