@@ -25,4 +25,8 @@ public class LobbyService {
         Jugador p = new Jugador(user, null);
         return this.lobbyDAO.addPlayer(p, codigo);
     }
+
+    public void create(Lobby lobby) {
+        this.lobbyDAO.create(lobby);
+    }
 }
