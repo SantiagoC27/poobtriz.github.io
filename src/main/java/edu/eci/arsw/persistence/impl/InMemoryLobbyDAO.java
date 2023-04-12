@@ -4,6 +4,7 @@ import java.util.*;
 
 
 import edu.eci.arsw.models.Lobby;
+import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
 import edu.eci.arsw.models.player.Player;
@@ -15,8 +16,8 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
     private static List<Lobby> lobbies = new ArrayList<>();
 
     public InMemoryLobbyDAO(){
-        Lobby l =new Lobby(123);         
-        l.addPlayer(new Admin("TEST", null));         
+        Lobby l =new Lobby(123);
+        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null)));      
         lobbies.add(l);
     }
 
