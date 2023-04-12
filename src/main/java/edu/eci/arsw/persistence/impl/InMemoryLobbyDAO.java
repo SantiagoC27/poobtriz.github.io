@@ -2,21 +2,23 @@ package edu.eci.arsw.persistence.impl;
 
 import java.util.*;
 
+
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.persistence.lobby.ILobbyDAO;
+import edu.eci.arsw.shared.TetrisException;
 
 public class InMemoryLobbyDAO implements ILobbyDAO{
 
     private static List<Lobby> lobbies = new ArrayList<>();
 
     @Override
-    public Lobby get(Lobby lobby) {
+    public Lobby get(int lobby) throws TetrisException {
         for (Lobby localLobby : lobbies) {
-            if (localLobby.getCode() == lobby.getCode()) {
-                return lobby;
+            if (localLobby.getCode() == lobby) {
+                return localLobby;
             }
         }
-        return null;
+        throw new TetrisException("");
     }
 
     @Override
