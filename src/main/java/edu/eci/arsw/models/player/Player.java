@@ -9,8 +9,10 @@ import edu.eci.arsw.shared.TetrisException;
 import lombok.Setter;
 
 
+
 public abstract class Player implements Serializable {
-	private final String nick;
+@Setter
+	private String nick;
 	@Setter
 	protected Tablero tablero;
 
@@ -60,5 +62,6 @@ public abstract class Player implements Serializable {
 	public boolean hasFinished() {
 		return tablero.hasFinished();
 	}
+
 
 }

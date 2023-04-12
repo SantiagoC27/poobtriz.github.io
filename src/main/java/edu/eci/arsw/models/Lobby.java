@@ -10,6 +10,7 @@ import java.util.Objects;
 
 @Getter
 public class Lobby {
+    @Setter
     private int codigo;
 
     @Setter
