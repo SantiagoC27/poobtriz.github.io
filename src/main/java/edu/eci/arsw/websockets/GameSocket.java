@@ -58,15 +58,20 @@ public class GameSocket {
 
     @OnError
     public void onError(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo, Throwable throwable) {
-        GameSession gs =games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList()).get(0);
-        gs.dropUser(username);
+        List<GameSession> gSessions = games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList());
+        if(gSessions.size() > 0){
+            GameSession gs = gSessions.get(0);
+            gs.dropUser(username);
+        }
     }
 
     @OnMessage
     public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo){
-        GameSession gs =games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList()).get(0);
-        gs.moveBlock(username, message);
-
+        List<GameSession> gSessions = games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList());
+        if(gSessions.size() > 0){
+            GameSession gs = gSessions.get(0);
+            gs.moveBlock(username, message);
+        }
     }
 
     private void broadcast(String message) {

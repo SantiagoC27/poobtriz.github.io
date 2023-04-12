@@ -15,6 +15,12 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
 
     private static List<Lobby> lobbies = new ArrayList<>();
 
+    public InMemoryLobbyDAO(){
+        Lobby l =new Lobby(123);
+        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null)));      
+        lobbies.add(l);
+    }
+
     @Override
     public Lobby get(int lobby) throws TetrisException {
         for (Lobby localLobby : lobbies) {
@@ -27,6 +33,7 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
 
     @Override
     public void create(Lobby lobby) {
+        System.out.println("Entro");
         Player admin = lobby.getPlayers().get(0);
         lobby.removePlayer(0);
         lobby.addPlayer(new Admin(admin.getNick(), null));
