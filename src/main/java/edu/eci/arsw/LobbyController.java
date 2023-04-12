@@ -24,6 +24,7 @@ public class LobbyController {
     @GET
     @Path("/{lobby}")
     public Response getLobby(@PathParam(value = "lobby") int lobby) throws TetrisException {
+        System.out.println("ENTRO");
     Lobby lobbyObtenido = lobbyS.get(lobby);
     if (lobbyObtenido == null) {
         return Response.status(Response.Status.NOT_FOUND).entity("Lobby no encontrado").build();

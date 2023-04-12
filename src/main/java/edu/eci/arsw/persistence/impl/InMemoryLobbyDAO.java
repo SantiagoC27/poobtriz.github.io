@@ -17,7 +17,7 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
 
     public InMemoryLobbyDAO(){
         Lobby l =new Lobby(123);
-        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null)));      
+        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null)));
         lobbies.add(l);
     }
 
@@ -28,6 +28,7 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
                 return localLobby;
             }
         }
+        System.out.println(lobby);
         throw new TetrisException("");
     }
 
