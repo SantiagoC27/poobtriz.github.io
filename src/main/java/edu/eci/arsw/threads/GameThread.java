@@ -64,10 +64,11 @@ public class GameThread extends Thread{
      */
     private void instanceGame(){
         List<BloqueTetris> bloques = Collections.synchronizedList(new ArrayList<>());
+        List<Tablero> tableros = new ArrayList<>();
         Tablero t;
         for (Player player: lobby.getPlayers()) {
             t = new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
-                    lobby.getFilas(), lobby.getCols(), bloques, buffos);
+                    lobby.getFilas(), lobby.getCols(), bloques, buffos, tableros);
             player.setTablero(t);
         }
         lobby.setEstado(Estado.RUNNING);

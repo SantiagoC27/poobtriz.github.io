@@ -1,8 +1,6 @@
 package edu.eci.arsw.models.buffos;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.io.Serializable;
 
 import edu.eci.arsw.models.Tablero;
@@ -22,6 +20,6 @@ public abstract class Buffo implements Serializable{
 	 /**
 	 * Activa el buffo
 	 */
-	public abstract void activate(Tablero t);
+	public abstract void activate(List<Tablero> tableros,int idTablero);
 	
 }

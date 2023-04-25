@@ -17,7 +17,7 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
 
     public InMemoryLobbyDAO(){
         Lobby l =new Lobby(123, 15, 10, 1000);
-        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null, null)));
+        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null, null, new ArrayList<>())));
         lobbies.add(l);
     }
 

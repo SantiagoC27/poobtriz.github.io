@@ -16,11 +16,11 @@ import lombok.Getter;
 @Getter
 public class Tablero implements Serializable{
 
-
+	private final int Id;
 	private final int filas;
 	private final int cols;
-	private ConcurrentLinkedQueue<Buffo> buffos;
-	public static List<Tablero> tableros = new ArrayList<>();
+	private final ConcurrentLinkedQueue<Buffo> buffos;
+	private final List<Tablero> tableros;
 
 	private final List<BloqueTetris> bloques;
 	@Expose
@@ -35,11 +35,11 @@ public class Tablero implements Serializable{
 
 	private final String bg;
 	private final AtomicInteger puntuacion = new AtomicInteger(0);
-	private int tiempo = 0;
 
 	private boolean finGame = false;
 	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques,
-				   ConcurrentLinkedQueue<Buffo> buffos) {
+				   ConcurrentLinkedQueue<Buffo> buffos, List<Tablero> tableros) {
+		this.buffos = buffos;
 		this.bloques = bloques;
 		this.filas = filas;
 		this.cols = cols;
@@ -48,7 +48,9 @@ public class Tablero implements Serializable{
 		velocidad = vel;
 		this.background = new String[filas][cols];
 		this.bgReborde =  new Reborde[filas][cols];
+		this.tableros = tableros;
 		tableros.add(this);
+		this.Id = tableros.size();
 		llenarMatriz();
 	}
 
@@ -63,12 +65,6 @@ public class Tablero implements Serializable{
 			}
 		
 	}
-
-	/**
-	 * Genera un buffo aleatorio en una coordenada alearotoria
-	 */
-
-
 
 
 	/**
@@ -121,6 +117,7 @@ public class Tablero implements Serializable{
 		if (!Colision(1, 0, block)){
 			haBajado = true;
 			block.moveDown();
+			validateBuffo(0,1);
 		}
 
 		return haBajado;
@@ -397,22 +394,20 @@ public class Tablero implements Serializable{
 	}
 
 	 /**
-	 * Valida que el buffo se active en la posicion indicada
+	 * Si el bloque está sobre la posición, lo activa
 	 */
-
 	public void validateBuffo(int x, int y) {
 		Buffo buffo = buffos.peek();
 		if(buffo != null) {
-		 			//get alturas, retorna la altura de cada
-		 			for(int[] c :block.getCoordenadas()) {
-		 				if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
-							 buffo.activate(this);
-							 buffos.poll();
-							 break;
-
-						 }
+				//get alturas, retorna la altura de cada
+				for(int[] c :block.getCoordenadas()) {
+					if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
+						 buffo.activate(tableros, this.Id);
+						 buffos.poll();
+						 break;
 					 }
-		 		}
+				 }
+			}
 
 	}
 	public void setMovilidadBlock(boolean p) {
@@ -425,10 +420,6 @@ public class Tablero implements Serializable{
 
 	public int[] getPositionBlock(){
 		return new int[]{block.getX(), block.getY()};
-	}
-
-	public int getTiempo() {
-		return tiempo;
 	}
 
 	/*

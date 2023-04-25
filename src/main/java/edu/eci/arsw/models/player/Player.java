@@ -43,10 +43,6 @@ public abstract class Player implements Serializable {
 		return tablero.getPuntuacionBloques();
 	}
 
-	public int getTiempo() {
-		return tablero.getTiempo();
-	}
-
 	public void setVelocidad(int velInicial) {
 		tablero.setVelocidad(velInicial);
 	}

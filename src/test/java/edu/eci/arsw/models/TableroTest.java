@@ -1,10 +1,13 @@
 package edu.eci.arsw.models;
 
+import edu.eci.arsw.models.buffos.Buffo;
+import edu.eci.arsw.models.buffos.factories.BuffoFactory;
 import edu.eci.arsw.shared.TetrisException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.*;
 
@@ -13,9 +16,11 @@ public class TableroTest {
 	int filas = 20;
 	int cols = 10;
 
+	ConcurrentLinkedQueue<Buffo> buffos = new ConcurrentLinkedQueue<>();
+
 	@Before
 	public void genTablero(){
-		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), null);
+		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), buffos, new ArrayList<>());
 		t.spawnBlock();
 	}
 	
@@ -93,6 +98,7 @@ public class TableroTest {
 	}
 
 	public void colisionTest(){
+		//TODO realizar test
 	}
 
 	@Test
@@ -102,8 +108,21 @@ public class TableroTest {
 		t.moveBlock("DOWN");
 		assert(t.getBlock() != null);
 		for (int i = 0; i < t.getFilas() / 2; i++) {
-			assert (t.moveBlock("DOWN"));
+			assertTrue(t.moveBlock("DOWN"));
 		}
-		assert(t.moveBlock("DOWN"));
+		assertTrue(t.moveBlock("DOWN"));
+	}
+
+	@Test
+	public void shouldActivateBuffo() throws TetrisException {
+		int[] position = new int[]{5,2};
+		Buffo b = BuffoFactory.getRandomBuffo(position, new ArrayList<>());
+		buffos.add(b);
+		for (int i = 0; i < position[1]; i++) {
+			t.moveBlock("DOWN");
+			assertEquals(1, buffos.size());
+		}
+		t.moveBlock("DOWN");
+		assertEquals(0, buffos.size());
 	}
 }
