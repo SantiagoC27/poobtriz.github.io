@@ -6,4 +6,9 @@ public class Admin extends Player{
     public Admin( String name, Tablero t) {
         super(name, t);
     }
+
+    
+    public Admin(){
+        super();
+    }
 }

@@ -1,5 +1,8 @@
 package edu.eci.arsw.models;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.eci.arsw.adapters.LobbyTypeAdapter;
 import edu.eci.arsw.models.player.Player;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,12 +57,6 @@ public class Lobby {
             if(!p.hasFinished()) finished = false;
         }
         return finished;
-    }
-
-    @Override
-    public String toString(){
-        return null;
-
     }
 
     public void removePlayer(String user) {

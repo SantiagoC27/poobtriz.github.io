@@ -26,6 +26,11 @@ public abstract class Player implements Serializable {
 		this.tablero = null;
 	}
 
+	public Player(){
+		this.nick = "";
+		this.tablero = null;
+	}
+
 	public BloqueTetris getBlock() {
 		return tablero.getBlock();
 	}

@@ -38,13 +38,11 @@ public class LobbyController {
 
     @POST
     public Lobby crearLobby(String sLobby) {
-        System.out.println(sLobby);
         Lobby lobby = gson.fromJson(sLobby, Lobby.class);
-        System.out.println(lobby);
         if (lobby.getPlayers().size() < 1) {
             throw new WebApplicationException("Debe haber al menos un jugador en el lobby", 400);
         }
-            lobbyS.create(lobby);
+        lobbyS.create(lobby);
         return lobby;
     }
      
