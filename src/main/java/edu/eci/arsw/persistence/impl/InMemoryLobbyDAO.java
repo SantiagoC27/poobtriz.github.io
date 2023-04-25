@@ -4,7 +4,6 @@ import java.util.*;
 
 
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
 import edu.eci.arsw.models.player.Player;
@@ -13,12 +12,9 @@ import edu.eci.arsw.shared.TetrisException;
 
 public class InMemoryLobbyDAO implements ILobbyDAO{
 
-    private static List<Lobby> lobbies = new ArrayList<>();
+    private static final List<Lobby> lobbies = new ArrayList<>();
 
     public InMemoryLobbyDAO(){
-        Lobby l =new Lobby(123);
-        l.addPlayer(new Admin("TEST", new Tablero(true, 1000, "red", 15, 10, null)));
-        lobbies.add(l);
     }
 
     @Override
@@ -34,7 +30,7 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
 
     @Override
     public void create(Lobby lobby) {
-        System.out.println("Entro");
+        System.out.println(lobby.getPlayers().get(0).getClass());
         Player admin = lobby.getPlayers().get(0);
         lobby.removePlayer(0);
         lobby.addPlayer(new Admin(admin.getNick(), null));
@@ -44,6 +40,13 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
     @Override
     public Lobby removePlayer(Lobby lobby, String user){
         lobby.removePlayer(user);
+        return lobby;
+    }
+
+    @Override
+    public Lobby removePlayer(String username, int codigo) throws TetrisException {
+        Lobby lobby = get(codigo);
+        lobby.removePlayer(username);
         return lobby;
     }
 

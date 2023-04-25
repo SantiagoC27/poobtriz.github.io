@@ -1,8 +1,5 @@
 package edu.eci.arsw.models;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import edu.eci.arsw.adapters.LobbyTypeAdapter;
 import edu.eci.arsw.models.player.Player;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +16,7 @@ public class Lobby {
     @Setter
     private Estado estado;
 
-    private final List<Player> players;
+    private List<Player> players;
 
     public Lobby(int codigo){
         this.codigo = codigo;
@@ -48,7 +45,8 @@ public class Lobby {
     }
 
     public void addPlayer(Player p){
-        this.players.add(p);
+        if (!this.players.stream().anyMatch(player -> player.getNick().equals(p.getNick())))
+            this.players.add(p);
     }
     
     public boolean endGame(){
@@ -67,4 +65,16 @@ public class Lobby {
         players.remove(index);
     }
 
+    @Override
+    public String toString() {
+
+        StringBuilder rta = new StringBuilder(String.format("{\"codigo\": %d, \"players\": [", codigo));
+        for (int i = 0; i < players.size(); i++) {
+            rta.append(players.get(i).toString());
+            if (i != players.size()-1) rta.append(",");
+        }
+
+        rta.append("]}");
+        return rta.toString();
+    }
 }

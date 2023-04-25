@@ -5,25 +5,21 @@ import javax.ws.rs.core.Response;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.eci.arsw.adapters.LobbyTypeAdapter;
+import edu.eci.arsw.adapters.PlayerTypeAdapter;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.player.Player;
-import edu.eci.arsw.persistence.impl.InMemoryLobbyDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.shared.TetrisException;
 
 
 @Path("/lobbies")
 public class LobbyController {
-
-    InMemoryLobbyDAO dao = new InMemoryLobbyDAO();
-    LobbyService lobbyS = new LobbyService(dao);
+    LobbyService lobbyS = new LobbyService();
 
     Gson gson = new GsonBuilder()
-            .registerTypeAdapter(Player.class, new LobbyTypeAdapter())
+            .registerTypeAdapter(Player.class, new PlayerTypeAdapter())
             .create();
 
-    
 
     @GET
     @Path("/{lobby}")

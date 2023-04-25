@@ -11,13 +11,13 @@ import edu.eci.arsw.models.player.Jugador;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class LobbyTypeAdapterTest{
+public class PlayerTypeAdapterTest {
 
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(Lobby.class,new LobbyTypeAdapter()).create();
+    private final Gson gson = new GsonBuilder().registerTypeAdapter(Lobby.class,new PlayerTypeAdapter()).create();
 
     @Test
     public void read() {
-        String sLobby = "{\"codigo\":123,\"players\":[{\"nick\":\"TEST\",\"tablero\":{\"cols\":0,\"filas\":0,\"background\":[],\"bgReborde\":[],\"puntuacion\":0}}],\"estado\":\"CREATED\"}";
+        String sLobby = "{ \"codigo\": 123, \"players\": [ { \"nick\": \"TEST\", \"tablero\": { \"cols\": 0, \"filas\": 0, \"background\": [], \"bgReborde\": [], \"puntuacion\": 0 } } ], \"estado\": \"CREATED\" }";
 
         Lobby lobby = gson.fromJson(sLobby, Lobby.class);
         assertEquals(1, lobby.getPlayers().size());
