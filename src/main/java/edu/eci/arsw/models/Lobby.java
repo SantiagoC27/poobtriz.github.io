@@ -16,20 +16,33 @@ public class Lobby {
     @Setter
     private Estado estado;
 
+    @Getter
+    private int filas;
+
+    @Getter
+    private int cols;
+
+    @Getter
+    private int velocity;
+
     private final List<Player> players;
 
-    public Lobby(int codigo){
+    public Lobby(int codigo, int filas, int cols, int velocity){
         this.codigo = codigo;
         this.estado = Estado.CREATED;
         this.players = new ArrayList<>();
+        this.filas = filas;
+        this.cols = cols;
+        this.velocity = velocity;
+
+    }
+
+    public Lobby(){
+        players = new ArrayList<>();
     }
 
     public int getCode() {
         return codigo;
-    }
-
-    public void setCode(int codigo) {
-        this.codigo = codigo;
     }
 
     public Estado getStatus() {
@@ -70,4 +83,11 @@ public class Lobby {
         players.remove(index);
     }
 
+    public List<String> getColorsTableros(){
+        List<String> colors = new ArrayList<>();
+        for (Player p : players) {
+            colors.add(p.getColorTablero());
+        }
+        return colors;
+    }
 }

@@ -38,7 +38,7 @@ public class GameSocket {
             sessions.put(username, session);
             Lobby l = lobbyService.get(codigo);
 
-            // if doesnt throws, the sessions is completed
+            // if it doesn't throw, the session is completed
             Map<String, Session> lobbySessions = SessionService.getSessions(l, sessions, true);
             GameSession game = new GameSession(l, lobbySessions, lobbyService);
             game.start();

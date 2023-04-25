@@ -2,6 +2,8 @@ package edu.eci.arsw.models;
 
 import java.io.Serializable;
 import java.util.*;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gson.annotations.Expose;
@@ -17,7 +19,7 @@ public class Tablero implements Serializable{
 
 	private final int filas;
 	private final int cols;
-	private Buffo buffo;
+	private ConcurrentLinkedQueue<Buffo> buffos;
 	public static List<Tablero> tableros = new ArrayList<>();
 
 	private final List<BloqueTetris> bloques;
@@ -36,7 +38,8 @@ public class Tablero implements Serializable{
 	private int tiempo = 0;
 
 	private boolean finGame = false;
-	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques) {
+	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques,
+				   ConcurrentLinkedQueue<Buffo> buffos) {
 		this.bloques = bloques;
 		this.filas = filas;
 		this.cols = cols;
@@ -65,12 +68,7 @@ public class Tablero implements Serializable{
 	 * Genera un buffo aleatorio en una coordenada alearotoria
 	 */
 
-	private void updateBuffo() {
-		for(Tablero t :Tablero.tableros) {
-			t.buffo = Buffo.selectRandomBuffo(crearCoordenada());
-		}
-		
-	}
+
 
 
 	/**
@@ -155,21 +153,6 @@ public class Tablero implements Serializable{
 				return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Crear el schedule para que se actualice la velocidad, el tiempo y el buffo cada cierto tiempo
-	 */
-	public void setVelYBuffos() {
-		final Timer timer = new Timer();
-		TimerTask velDown = new TimerTask() {
-			public void run() {
-			if(tiempo % 10 == 0) {
-				updateBuffo();				
-			}
-			}
-		};
-		timer.schedule(velDown,1000,1000);
 	}
 	
 	/**
@@ -418,19 +401,20 @@ public class Tablero implements Serializable{
 	 */
 
 	public void validateBuffo(int x, int y) {
-		// Ver la posicion del buffo
+		Buffo buffo = buffos.peek();
 		if(buffo != null) {
-			//get alturas, retorna la altura de cada 
-			for(int[] c :block.getCoordenadas()) {
-				if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
-					buffo.activate(this);
-					buffo = null;
-					break;
-				}
-			}			
-		}
-	}
+		 			//get alturas, retorna la altura de cada
+		 			for(int[] c :block.getCoordenadas()) {
+		 				if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
+							 buffo.activate(this);
+							 buffos.poll();
+							 break;
 
+						 }
+					 }
+		 		}
+
+	}
 	public void setMovilidadBlock(boolean p) {
 		if(block != null) block.setMovilidad(p);
 	}

@@ -64,4 +64,7 @@ public abstract class Player implements Serializable {
 	}
 
 
+    public String getColorTablero() {
+		return tablero.getBg();
+    }
 }

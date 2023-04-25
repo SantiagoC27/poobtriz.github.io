@@ -32,7 +32,7 @@ public class LobbyTypeAdapter extends TypeAdapter<Lobby> {
 
     @Override
     public Lobby read(JsonReader in) throws IOException {
-        Lobby lobby = new Lobby(0);
+        Lobby lobby = new Lobby();
         List<Player> players = new ArrayList<>();
 
         in.beginObject();
