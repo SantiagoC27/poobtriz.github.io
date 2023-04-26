@@ -1,5 +1,6 @@
 package edu.eci.arsw.websockets;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,11 +16,9 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gson.Gson;
 
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.persistence.impl.InMemoryLobbyDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.SessionService;
 import edu.eci.arsw.shared.TetrisException;
-import edu.eci.arsw.threads.GameSession;
 
 @ServerEndpoint(value ="/lobby/{username}/{codigo}")
 @ApplicationScoped
@@ -28,7 +27,7 @@ public class LobbySocket {
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    private final LobbyService lobbyService = new LobbyService(new InMemoryLobbyDAO());
+    private final LobbyService lobbyService = new LobbyService();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo){
@@ -44,7 +43,15 @@ public class LobbySocket {
     }
 
     @OnClose
-    public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) {
+    public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) throws IOException, TetrisException {
+
+        Map<String, Session> lobbySessions = SessionService.getSessions(lobbyService.get(codigo), sessions, false);
+        for (String user:  lobbySessions.keySet()) {
+            lobbySessions.get(user).close();
+            sessions.remove(user);
+        }
+        sessions.remove(username);
+
     }
 
     @OnError
@@ -53,8 +60,11 @@ public class LobbySocket {
     }
 
     @OnMessage
-    public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo){
-
+    public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo) throws TetrisException {
+        Lobby lobby = lobbyService.removePlayer(message, codigo);
+        sessions.remove(message);
+        Map<String, Session> lobbySessions = SessionService.getSessions(lobby, sessions, false);
+        broadcast(gson.toJson(lobby), lobbySessions);
     }
 
     private void broadcast(String message, Map<String, Session> sessionsLobby) {

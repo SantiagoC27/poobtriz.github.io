@@ -10,12 +10,13 @@ import java.util.Objects;
 
 @Getter
 public class Lobby {
+    @Setter
     private int codigo;
 
     @Setter
     private Estado estado;
 
-    private final List<Player> players;
+    private List<Player> players;
 
     public Lobby(int codigo){
         this.codigo = codigo;
@@ -44,7 +45,8 @@ public class Lobby {
     }
 
     public void addPlayer(Player p){
-        this.players.add(p);
+        if (!this.players.stream().anyMatch(player -> player.getNick().equals(p.getNick())))
+            this.players.add(p);
     }
     
     public boolean endGame(){
@@ -55,12 +57,6 @@ public class Lobby {
         return finished;
     }
 
-    @Override
-    public String toString(){
-        return null;
-
-    }
-
     public void removePlayer(String user) {
         players.removeIf( p -> Objects.equals(p.getNick(), user));
     }
@@ -69,4 +65,16 @@ public class Lobby {
         players.remove(index);
     }
 
+    @Override
+    public String toString() {
+
+        StringBuilder rta = new StringBuilder(String.format("{\"codigo\": %d, \"players\": [", codigo));
+        for (int i = 0; i < players.size(); i++) {
+            rta.append(players.get(i).toString());
+            if (i != players.size()-1) rta.append(",");
+        }
+
+        rta.append("]}");
+        return rta.toString();
+    }
 }

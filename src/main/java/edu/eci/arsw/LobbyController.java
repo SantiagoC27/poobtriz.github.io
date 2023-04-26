@@ -1,25 +1,25 @@
 package edu.eci.arsw;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.GET;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import edu.eci.arsw.adapters.PlayerTypeAdapter;
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.persistence.impl.InMemoryLobbyDAO;
+import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.shared.TetrisException;
 
 
 @Path("/lobbies")
 public class LobbyController {
+    LobbyService lobbyS = new LobbyService();
 
-    InMemoryLobbyDAO dao = new InMemoryLobbyDAO();
-    LobbyService lobbyS = new LobbyService(dao);
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Player.class, new PlayerTypeAdapter())
+            .create();
 
-    
 
     @GET
     @Path("/{lobby}")
@@ -33,9 +33,8 @@ public class LobbyController {
     }
 
     @POST
-    @Path("/")
-    public Lobby crearLobby(Lobby lobby) {
-        System.out.println(lobby);
+    public Lobby crearLobby(String sLobby) {
+        Lobby lobby = gson.fromJson(sLobby, Lobby.class);
         if (lobby.getPlayers().size() < 1) {
             throw new WebApplicationException("Debe haber al menos un jugador en el lobby", 400);
         }

@@ -8,4 +8,7 @@ public class Jugador extends Player{
 		super(name, t);
 	}
 
+	public Jugador(){
+		super();
+	}
 }

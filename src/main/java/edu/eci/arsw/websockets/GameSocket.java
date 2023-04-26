@@ -16,7 +16,6 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.persistence.impl.InMemoryLobbyDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.SessionService;
 import edu.eci.arsw.shared.TetrisException;
@@ -30,7 +29,7 @@ public class GameSocket {
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
-    private final LobbyService lobbyService = new LobbyService(new InMemoryLobbyDAO());
+    private final LobbyService lobbyService = new LobbyService();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo){
