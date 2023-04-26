@@ -1,12 +1,12 @@
 package edu.eci.arsw.models;
 
-import edu.eci.arsw.models.player.Player;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import edu.eci.arsw.models.player.Player;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class Lobby {
@@ -16,13 +16,10 @@ public class Lobby {
     @Setter
     private Estado estado;
 
-    @Getter
     private int filas;
 
-    @Getter
     private int cols;
 
-    @Getter
     private int velocity;
 
     private final List<Player> players;
@@ -58,7 +55,8 @@ public class Lobby {
     }
 
     public void addPlayer(Player p){
-        this.players.add(p);
+        if (!this.players.stream().anyMatch(player -> player.getNick().equals(p.getNick())))
+            this.players.add(p);
     }
     
     public boolean endGame(){
@@ -67,12 +65,6 @@ public class Lobby {
             if(!p.hasFinished()) finished = false;
         }
         return finished;
-    }
-
-    @Override
-    public String toString(){
-        return null;
-
     }
 
     public void removePlayer(String user) {
@@ -89,5 +81,18 @@ public class Lobby {
             colors.add(p.getColorTablero());
         }
         return colors;
+    }
+    
+    @Override
+    public String toString() {
+
+        StringBuilder rta = new StringBuilder(String.format("{\"codigo\": %d, \"players\": [", codigo));
+        for (int i = 0; i < players.size(); i++) {
+            rta.append(players.get(i).toString());
+            if (i != players.size()-1) rta.append(",");
+        }
+
+        rta.append("]}");
+        return rta.toString();
     }
 }

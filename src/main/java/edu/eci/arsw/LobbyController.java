@@ -5,25 +5,21 @@ import javax.ws.rs.core.Response;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import edu.eci.arsw.adapters.LobbyTypeAdapter;
+import edu.eci.arsw.adapters.PlayerTypeAdapter;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.player.Player;
-import edu.eci.arsw.persistence.impl.InMemoryLobbyDAO;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.shared.TetrisException;
 
 
 @Path("/lobbies")
 public class LobbyController {
-
-    InMemoryLobbyDAO dao = new InMemoryLobbyDAO();
-    LobbyService lobbyS = new LobbyService(dao);
+    LobbyService lobbyS = new LobbyService();
 
     Gson gson = new GsonBuilder()
-            .registerTypeAdapter(Player.class, new LobbyTypeAdapter())
+            .registerTypeAdapter(Player.class, new PlayerTypeAdapter())
             .create();
 
-    
 
     @GET
     @Path("/{lobby}")
@@ -38,13 +34,11 @@ public class LobbyController {
 
     @POST
     public Lobby crearLobby(String sLobby) {
-        System.out.println(sLobby);
         Lobby lobby = gson.fromJson(sLobby, Lobby.class);
-        System.out.println(lobby);
         if (lobby.getPlayers().size() < 1) {
             throw new WebApplicationException("Debe haber al menos un jugador en el lobby", 400);
         }
-            lobbyS.create(lobby);
+        lobbyS.create(lobby);
         return lobby;
     }
      
