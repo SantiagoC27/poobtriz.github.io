@@ -39,12 +39,14 @@ public class GameThread extends Thread{
     @Override
     public void run(){
         instanceGame();
-        tbuffos.start();
+        //tbuffos.start();
         while(!lobby.endGame()){
             for (Player player: lobby.getPlayers()) {
                 try {
                     player.moveBlock("DOWN");
-                }catch (TetrisException ignored){}
+                }catch (TetrisException ex){
+                    ex.printStackTrace();
+                }
             }
             playersMoved.set(true);
 
@@ -70,10 +72,10 @@ public class GameThread extends Thread{
             t = new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
                     lobby.getFilas(), lobby.getCols(), bloques, buffos, tableros);
             player.setTablero(t);
+            tableros.add(t);
+
         }
         lobby.setEstado(Estado.RUNNING);
-
-
     }
 
     public void moveBlock(String username, String movement) {

@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.*;
@@ -20,7 +21,9 @@ public class TableroTest {
 
 	@Before
 	public void genTablero(){
-		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), buffos, new ArrayList<>());
+		List<Tablero> tableros = new ArrayList<>();
+		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), buffos, tableros);
+		tableros.add(t);
 		t.spawnBlock();
 	}
 	
@@ -107,7 +110,7 @@ public class TableroTest {
 		assert(t.getBlock() == null);
 		t.moveBlock("DOWN");
 		assert(t.getBlock() != null);
-		for (int i = 0; i < t.getFilas() / 2; i++) {
+		for (int i = 0; i < t.background.length / 2; i++) {
 			assertTrue(t.moveBlock("DOWN"));
 		}
 		assertTrue(t.moveBlock("DOWN"));

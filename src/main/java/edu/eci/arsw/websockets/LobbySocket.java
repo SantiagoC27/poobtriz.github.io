@@ -36,7 +36,7 @@ public class LobbySocket {
             Lobby l = lobbyService.addPlayer(username, codigo);
             Map<String, Session> lobbySessions = SessionService.getSessions(l, sessions, false);
             
-            broadcast(gson.toJson(l), lobbySessions);
+            broadcast(l.toString(), lobbySessions);
         }catch (TetrisException ignored){}
 
 
@@ -64,7 +64,7 @@ public class LobbySocket {
         Lobby lobby = lobbyService.removePlayer(message, codigo);
         sessions.remove(message);
         Map<String, Session> lobbySessions = SessionService.getSessions(lobby, sessions, false);
-        broadcast(gson.toJson(lobby), lobbySessions);
+        broadcast(lobby.toString(), lobbySessions);
     }
 
     private void broadcast(String message, Map<String, Session> sessionsLobby) {

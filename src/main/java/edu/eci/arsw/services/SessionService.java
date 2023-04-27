@@ -21,7 +21,6 @@ public class SessionService {
         Map<String, Session> session = new ConcurrentHashMap<>();
 
         for (Player p: lobby.getPlayers()) {
-            System.out.println(p.getNick());
             Session aux = allSessions.get(p.getNick());
             if (aux != null) session.put(p.getNick(), aux);
             else if (throwing) throw new TetrisException(TetrisException.INVALID_SESSION);

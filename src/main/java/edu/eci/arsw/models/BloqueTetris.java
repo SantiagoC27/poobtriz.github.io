@@ -124,7 +124,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 		int aux;
 		if(currentRotation > 3) aux = 0; else aux = currentRotation; 
 		int[][] next = rotaciones[aux];
-		return x + next[0].length <= t.getCols() && y + next.length < t.getFilas();
+		return x + next[0].length <= t.background[0].length && y + next.length < t.background.length;
 	}
 	
 	public BloqueTetris Clone(){
@@ -305,7 +305,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 		int pos = 0;
 		for(int c = 0; c < getWidth(); c++) {
 			for(int r = getHeight()-1; r >= 0 ; r--) {
-				if(shape[r][c] == 1 && r+ y < t.getFilas() && x + c< t.getCols()) {
+				if(shape[r][c] == 1 && r+ y < t.background.length && x + c< t.background[0].length) {
 					int[] aux = {c+x,r+y};
 					coords[pos] =  aux;
 					pos++;
@@ -395,9 +395,9 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public int[][] traducir(Tablero t, String col) {
 		int[][] rta = new int[5][];
 		int cont = 0;
-		for(int i = y; i < t.getFilas() && i < y + 4; i++) {
-			int[] aux = new int[t.getCols()-x];
-			for(int j =x; j < t.getCols() && j <x + 4; j++) {
+		for(int i = y; i < t.background.length && i < y + 4; i++) {
+			int[] aux = new int[t.background[0].length-x];
+			for(int j =x; j < t.background[0].length && j <x + 4; j++) {
 				if(Objects.equals(t.getBackground()[i][j], col)) aux[j-x] = 1;  else aux[j-x] = 0;
 			}
 			rta[cont] = aux;

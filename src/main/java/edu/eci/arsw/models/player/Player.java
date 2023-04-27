@@ -8,7 +8,7 @@ import lombok.Setter;
 
 
 
-public abstract class Player implements Serializable {
+public class Player implements Serializable {
 @Setter
 	private String nick;
 	@Setter
@@ -24,6 +24,10 @@ public abstract class Player implements Serializable {
 		this.tablero = null;
 	}
 
+	public Tablero getTablero(){
+		return this.tablero;
+	}
+
 	public Player(){
 		this.nick = "";
 		this.tablero = null;
@@ -34,21 +38,33 @@ public abstract class Player implements Serializable {
 	}
 
 	public String getColorTablero(){
-		return tablero.getBg();
+		String color = null;
+		if (tablero != null) color = tablero.getBg();
+		return color;
 	}
 
 	public boolean moveBlock(String movement) throws TetrisException {
+		System.out.println(tablero);
 		return tablero.moveBlock(movement.toUpperCase());
 	}
 
 	public boolean hasFinished() {
+		boolean finished = true;
 		if (tablero != null)
-			return tablero.hasFinished();
-		return true;
+			finished = tablero.hasFinished();
+		System.out.println("player " + nick + "dice" + finished);
+		return finished;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("{\"nick\": \"%s\"}", nick);
+		StringBuilder sRta = new StringBuilder();
+		sRta.append(String.format("{\"nick\": \"%s\"", nick));
+		if (tablero != null){
+			sRta.append(String.format(",\"tablero\": %s", tablero));
+		}
+		sRta.append("}");
+		return sRta.toString();
 	}
+
 }
