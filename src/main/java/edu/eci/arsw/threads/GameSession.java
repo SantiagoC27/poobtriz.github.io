@@ -6,19 +6,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.websocket.Session;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import edu.eci.arsw.adapters.PlayerTypeAdapter;
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.services.LobbyService;
 
 public class GameSession extends Thread{
-    private static final Gson gson = new GsonBuilder()
-    //.registerTypeAdapter(Player.class, new PlayerTypeAdapter())
-    .create();
     private final LobbyService lobbyService;
 
     private Lobby lobby;
@@ -41,16 +32,23 @@ public class GameSession extends Thread{
     public void run(){
         this.gt.start();
         while (gt.isAlive()){
-            if (playersMoved.get()){
+            try {
+                if (!playersMoved.get()) playersMoved.wait();
+
                 playersMoved.set(false);
                 broadcast();
-            }
+            } catch (InterruptedException ignored) {}
         }
-        System.out.println("Desde el session el game murio");
 
     }
 
     public void moveBlock(String user, String movement){
+        while (gt.isAlive()){
+            if (playersMoved.get()){
+                GameModifyThread gmt = new GameModifyThread(gt, user, movement);
+                gmt.start();
+            }
+        }
         this.gt.moveBlock(user, movement);
         broadcast();
     }

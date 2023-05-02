@@ -9,7 +9,7 @@ import lombok.Setter;
 
 
 public class Player implements Serializable {
-@Setter
+	@Setter
 	private String nick;
 	@Setter
 	protected Tablero tablero;
@@ -44,15 +44,16 @@ public class Player implements Serializable {
 	}
 
 	public boolean moveBlock(String movement) throws TetrisException {
-		System.out.println(tablero);
-		return tablero.moveBlock(movement.toUpperCase());
+		synchronized (tablero){
+			return tablero.moveBlock(movement.toUpperCase());
+		}
+
 	}
 
 	public boolean hasFinished() {
 		boolean finished = true;
 		if (tablero != null)
 			finished = tablero.hasFinished();
-		System.out.println("player " + nick + "dice" + finished);
 		return finished;
 	}
 

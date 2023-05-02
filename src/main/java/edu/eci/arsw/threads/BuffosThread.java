@@ -28,6 +28,7 @@ public class BuffosThread implements Runnable{
 
                 int[] coord = new int[]{(int) (Math.random()*filas), (int) (Math.random()*cols)};
                 buffos.add(BuffoFactory.getRandomBuffo(coord, colors));
+                System.out.println("Buffo instanced");
             }
         };
     }

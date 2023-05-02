@@ -34,7 +34,8 @@ public class Lobby {
         this.filas = filas;
         this.cols = cols;
         this.velocity = velocity;
-        this.admin = null;
+        this.admin = admin;
+        players.add(this.admin);
 
     }
 
@@ -65,7 +66,6 @@ public class Lobby {
     }
     
     public boolean endGame(){
-        System.out.println("pregunto si termina game");
         boolean finished = true;
         for (Player p : players) {
             if(!p.hasFinished()) finished = false;

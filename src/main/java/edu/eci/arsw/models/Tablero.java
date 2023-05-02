@@ -5,7 +5,6 @@ import java.util.*;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
@@ -180,7 +179,6 @@ public class Tablero implements Serializable{
 	 * @throws TetrisException si el bloque es nulo
 	 */
 	public synchronized boolean moveBlock(String movement) throws TetrisException{
-		// Si no ha acabado el juego, ver si se debe instanciar un bloque
 		boolean moved = false;
 		if (!finGame){
 			if (block == null) spawnBlock();

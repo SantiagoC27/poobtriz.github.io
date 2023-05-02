@@ -6,8 +6,8 @@ import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.player.Player;
+import edu.eci.arsw.notifiers.PlayerNotifier;
 import edu.eci.arsw.shared.TetrisException;
-
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,6 +20,8 @@ public class GameThread extends Thread{
     private final AtomicBoolean playersMoved;
 
     private final AtomicBoolean endGame = new AtomicBoolean(false);
+
+    private final List<PlayerNotifier> players = new ArrayList<>();
 
     private final Thread tbuffos;
 
@@ -39,9 +41,9 @@ public class GameThread extends Thread{
     @Override
     public void run(){
         instanceGame();
-        //tbuffos.start();
+        tbuffos.start();
         while(!lobby.endGame()){
-            for (Player player: lobby.getPlayers()) {
+            for (PlayerNotifier player : players) {
                 try {
                     player.moveBlock("DOWN");
                 }catch (TetrisException ex){
@@ -68,14 +70,22 @@ public class GameThread extends Thread{
         List<BloqueTetris> bloques = Collections.synchronizedList(new ArrayList<>());
         List<Tablero> tableros = new ArrayList<>();
         Tablero t;
+        AtomicBoolean moved;
         for (Player player: lobby.getPlayers()) {
+
+            moved = new AtomicBoolean(false);
             t = new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
                     lobby.getFilas(), lobby.getCols(), bloques, buffos, tableros);
             player.setTablero(t);
             tableros.add(t);
+            players.add(new PlayerNotifier(player, moved));
 
         }
         lobby.setEstado(Estado.RUNNING);
+    }
+
+    public PlayerNotifier getPlayer(String name){
+        return players.stream().filter(p -> p.getPlayer().getNick().equals(name)).collect(Collectors.toList()).get(0);
     }
 
     public void moveBlock(String username, String movement) {
