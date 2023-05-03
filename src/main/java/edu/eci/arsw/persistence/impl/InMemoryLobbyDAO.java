@@ -1,10 +1,10 @@
 package edu.eci.arsw.persistence.impl;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import edu.eci.arsw.models.Lobby;
-import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
 import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.persistence.lobby.ILobbyDAO;
@@ -14,26 +14,23 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
 
     private static final List<Lobby> lobbies = new ArrayList<>();
 
-    public InMemoryLobbyDAO(){
-    }
-
     @Override
     public Lobby get(int lobby) throws TetrisException {
         for (Lobby localLobby : lobbies) {
-            if (localLobby.getCode() == lobby) {
+            if (localLobby.getCodigo() == lobby) {
                 return localLobby;
             }
         }
-        System.out.println(lobby);
         throw new TetrisException("");
     }
 
     @Override
     public void create(Lobby lobby) {
-        System.out.println(lobby.getPlayers().get(0).getClass());
-        Player admin = lobby.getPlayers().get(0);
-        lobby.removePlayer(0);
-        lobby.addPlayer(new Admin(admin.getNick(), null));
+        if (lobby.getAdmin() == null){
+            Player admin = lobby.getPlayers().get(0);
+            lobby.setAdmin(admin);
+        }
+        lobby.setCodigo(lobbies.size() + 1);
         lobbies.add(lobby);
     }
 
@@ -55,6 +52,7 @@ public class InMemoryLobbyDAO implements ILobbyDAO{
         Lobby lobby = get(codigo);
         if(lobby.getPlayers().stream().noneMatch(x->Objects.equals(x.getNick(), p.getNick())))
         {
+
             lobby.addPlayer(p);
         }
         return lobby;

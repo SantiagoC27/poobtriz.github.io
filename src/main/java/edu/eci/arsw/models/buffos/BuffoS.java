@@ -1,7 +1,9 @@
 package edu.eci.arsw.models.buffos;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import edu.eci.arsw.models.Tablero;
 
@@ -13,7 +15,8 @@ public class BuffoS extends Buffo{
 	}
 	
 	@Override
-	public void activate(final Tablero t) {
+	public void activate(final List<Tablero> tableros, int idTablero) {
+		Tablero t = tableros.stream().filter(s -> s.getId() == idTablero).collect(Collectors.toList()).get(0);
 		//Las fichas bajan mas lento por 3 segundos
 		final Timer timer = new Timer();
 		t.setVelocidad(t.getVelocidad()*2);

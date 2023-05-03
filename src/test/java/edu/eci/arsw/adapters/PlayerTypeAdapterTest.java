@@ -1,19 +1,22 @@
 package edu.eci.arsw.adapters;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import edu.eci.arsw.models.Tablero;
+import edu.eci.arsw.models.player.Player;
+import org.junit.Test;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import edu.eci.arsw.models.Estado;
 import edu.eci.arsw.models.Lobby;
-
-
-import edu.eci.arsw.models.player.Admin;
 import edu.eci.arsw.models.player.Jugador;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class PlayerTypeAdapterTest {
 
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(Lobby.class,new PlayerTypeAdapter()).create();
+    private final Gson gson = new GsonBuilder().registerTypeAdapter(Player.class,new PlayerTypeAdapter()).create();
 
     @Test
     public void read() {
@@ -28,10 +31,9 @@ public class PlayerTypeAdapterTest {
 
     @Test
     public void write() {
-
-        Lobby lobby = new Lobby(123);
-        lobby.addPlayer(new Jugador("Testing", null));
-        lobby.addPlayer(new Admin("Testing2", null));
+        Lobby lobby = new Lobby();
+        lobby.addPlayer(new Jugador("Testing", new Tablero()));
+        lobby.addPlayer(new Jugador("Testing2", null));
         String sLobby = gson.toJson(lobby);
         assertTrue(sLobby.contains(lobby.getPlayers().get(0).getNick()));
         assertTrue(sLobby.contains(lobby.getPlayers().get(1).getNick()));

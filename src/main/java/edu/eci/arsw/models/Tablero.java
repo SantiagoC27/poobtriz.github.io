@@ -2,9 +2,10 @@ package edu.eci.arsw.models;
 
 import java.io.Serializable;
 import java.util.*;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.google.gson.annotations.Expose;
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.TetrisException;
@@ -14,16 +15,12 @@ import lombok.Getter;
 @Getter
 public class Tablero implements Serializable{
 
-
-	private final int filas;
-	private final int cols;
-	private Buffo buffo;
-	public static List<Tablero> tableros = new ArrayList<>();
-
+	private final int Id;
+	private final ConcurrentLinkedQueue<Buffo> buffos;
+	private final List<Tablero> tableros;
 	private final List<BloqueTetris> bloques;
-	@Expose
+
 	public String[][] background;
-	@Expose
 	public Reborde[][] bgReborde;
 	private int bloquesUsados = 0;
 	private BloqueTetris block = null;
@@ -33,19 +30,32 @@ public class Tablero implements Serializable{
 
 	private final String bg;
 	private final AtomicInteger puntuacion = new AtomicInteger(0);
-	private int tiempo = 0;
 
 	private boolean finGame = false;
-	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques) {
+	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques,
+				   ConcurrentLinkedQueue<Buffo> buffos, List<Tablero> tableros) {
+		this.buffos = buffos;
 		this.bloques = bloques;
-		this.filas = filas;
-		this.cols = cols;
 		this.bg = bg;
 		Tablero.uniforme = uniforme;
 		velocidad = vel;
 		this.background = new String[filas][cols];
 		this.bgReborde =  new Reborde[filas][cols];
-		tableros.add(this);
+		this.tableros = tableros;
+		this.Id = tableros.size();
+		llenarMatriz();
+	}
+
+	public Tablero(){
+		this.buffos = new ConcurrentLinkedQueue<>();
+		this.bloques = new ArrayList<>();
+		this.bg = "yellow";
+		Tablero.uniforme = true;
+		velocidad = 1000;
+		this.background = new String[15][10];
+		this.bgReborde =  new Reborde[15][10];
+		this.tableros = new ArrayList<>();
+		this.Id = 0;
 		llenarMatriz();
 	}
 
@@ -53,22 +63,11 @@ public class Tablero implements Serializable{
 	 * Llena con el color del tablero todas las casillas
 	 */
 	private void llenarMatriz() {
-		for(int r = 0; r < filas; r++) {
-			for(int c = 0; c < cols; c++) {
+		for(int r = 0; r < background.length; r++) {
+			for(int c = 0; c < background[0].length; c++) {
 				background[r][c] = bg;
 				}
 			}
-		
-	}
-
-	/**
-	 * Genera un buffo aleatorio en una coordenada alearotoria
-	 */
-
-	private void updateBuffo() {
-		for(Tablero t :Tablero.tableros) {
-			t.buffo = Buffo.selectRandomBuffo(crearCoordenada());
-		}
 		
 	}
 
@@ -80,10 +79,10 @@ public class Tablero implements Serializable{
 	private int[] crearCoordenada() {
 		Random random = new Random();
 		int[] coord = new int[2];
-		int n =  random.nextInt(filas-1);
+		int n =  random.nextInt(background.length-1);
 		if(tableros.size() == 1) {
 			int[] coords =tableros.get(0).getCoordenadasLibres(n);
-			coord[0] = coords[random.nextInt(cols-1)];
+			coord[0] = coords[random.nextInt(background[0].length-1)];
 			coord[1] = n;
 		}else {
 			try {
@@ -107,10 +106,9 @@ public class Tablero implements Serializable{
 	 * Genera un tetromino aleatorio con color distinto al del fondo del tablero.
 	 */
 	public void spawnBlock() {
-		bloquesUsados++;
-		if(bloquesUsados > bloques.size()) bloques.add(BloqueTetris.getRandomBlock(bloquesUsados, bg));
-		block = bloques.get(bloquesUsados - 1);
-		block.spawn(cols);
+		if(bloquesUsados <= bloques.size()) bloques.add(BloqueTetris.selectRandomBlock(bg));
+		block = bloques.get(bloquesUsados).Clone();
+		block.spawn(background[0].length);
 	}
 
 
@@ -123,6 +121,7 @@ public class Tablero implements Serializable{
 		if (!Colision(1, 0, block)){
 			haBajado = true;
 			block.moveDown();
+			validateBuffo(0,1);
 		}
 
 		return haBajado;
@@ -134,8 +133,11 @@ public class Tablero implements Serializable{
 	 */
 
 	private void calculateFinGame(){
-		BloqueTetris b = BloqueTetris.getRandomBlock(bloquesUsados, bg);
-		if(block == null && Colision(1, 0, b)) finGame = true;
+		BloqueTetris b = BloqueTetris.selectRandomBlock(bg);
+		if(block == null && Colision(1, 0, b)) {
+			finGame = true;
+		}
+
 	}
 
 
@@ -156,21 +158,6 @@ public class Tablero implements Serializable{
 		}
 		return false;
 	}
-
-	/**
-	 * Crear el schedule para que se actualice la velocidad, el tiempo y el buffo cada cierto tiempo
-	 */
-	public void setVelYBuffos() {
-		final Timer timer = new Timer();
-		TimerTask velDown = new TimerTask() {
-			public void run() {
-			if(tiempo % 10 == 0) {
-				updateBuffo();				
-			}
-			}
-		};
-		timer.schedule(velDown,1000,1000);
-	}
 	
 	/**
 	 * Mueve el bloque a la derecha si es posible
@@ -178,7 +165,7 @@ public class Tablero implements Serializable{
 	 */
 	private boolean moveBlockRight() throws TetrisException{
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
-		if(block.getX() + block.getWidth() < cols && !Colision(0,1, this.block)){
+		if(block.getX() + block.getWidth() < background[0].length && !Colision(0,1, this.block)){
 			validateBuffo(1,0);
 			block.moveRight();
 			return true;
@@ -194,7 +181,6 @@ public class Tablero implements Serializable{
 	 * @throws TetrisException si el bloque es nulo
 	 */
 	public synchronized boolean moveBlock(String movement) throws TetrisException{
-		// Si no ha acabado el juego, ver si se debe instanciar un bloque
 		boolean moved = false;
 		if (!finGame){
 			if (block == null) spawnBlock();
@@ -218,9 +204,12 @@ public class Tablero implements Serializable{
 					break;
 			}
 			if (moved) moveBlockToBackground();
-			else calculatePuntuacion();
-			calculateFinGame();
+			else {
+				calculatePuntuacion();
+				bloquesUsados++;
+			}
 		}
+		calculateFinGame();
 
 		return moved;
 	}
@@ -246,9 +235,9 @@ public class Tablero implements Serializable{
 	public int clearLines() {
 			boolean lineFilled;
 			int linesCleared = 0;
-			for(int r = filas - 1; r >= 0; r--) {
+			for(int r = background.length - 1; r >= 0; r--) {
 				lineFilled = true;
-				for(int c = 0; c < cols; c++) {
+				for(int c = 0; c < background[0].length; c++) {
 					if(Objects.equals(background[r][c], bg)) {
 						lineFilled = false;
 						break;
@@ -256,9 +245,9 @@ public class Tablero implements Serializable{
 				}
 				if(lineFilled && isBorrable(r)) {
 					linesCleared++;
-					clearLine(r,0,cols);
+					clearLine(r,0,background[0].length);
 					shiftDown(r);
-					clearLine(0,0,cols);
+					clearLine(0,0,background[0].length);
 					r++;
 				}
 			}
@@ -289,7 +278,7 @@ public class Tablero implements Serializable{
 	*/
 	private void shiftDown(int r) {
 		for(int fila = r; fila > 0; fila--) {
-			for(int col = 0; col < cols; col++) {
+			for(int col = 0; col < background[0].length; col++) {
 				background[fila][col]=background[fila - 1][col];
 				bgReborde[fila][col]=bgReborde[fila - 1][col];
 			}
@@ -301,7 +290,7 @@ public class Tablero implements Serializable{
 	private void moveBlockToBackground() {
 			for(int[] co :block.getCoordenadas()) {
 				if(co[1] < 0) continue;
-				if(co[1] < filas && co[0]< cols) {
+				if(co[1] < background.length && co[0]< background[0].length) {
 					background[co[1]][co[0]] = block.getColor();
 					bgReborde[co[1]][co[0]] = block.getReborde();
 				}
@@ -314,7 +303,7 @@ public class Tablero implements Serializable{
 	private void removeBlockFromBackground() {
 		for(int[] co :block.getCoordenadas()) {
 			if (co[1]  < 0) continue;
-			if(co[1] < filas && co[0]< cols) {
+			if(co[1] < background.length && co[0]< background[0].length) {
 				background[co[1]][co[0]] = bg;
 				bgReborde[co[1]][co[0]] = null;
 			}
@@ -362,7 +351,7 @@ public class Tablero implements Serializable{
 
 	private boolean isBorrable(int fil) {
 		boolean borrable = true; 
-		for(int i = 0; i < cols; i++) {
+		for(int i = 0; i < background[0].length; i++) {
 			if(bgReborde[fil][i] != null && !bgReborde[fil][i].isBorrable()) {
 				borrable = false;
 				break;
@@ -403,9 +392,9 @@ public class Tablero implements Serializable{
 	 * @return Los espacios libres
 	 */
 	public int[] getCoordenadasLibres(int n) {
-		int[] nums = new int[cols];
+		int[] nums = new int[background[0].length];
 		int pos = 0;
-		for(int j = 0; j < cols; j++)
+		for(int j = 0; j < background[0].length; j++)
 			if(Objects.equals(background[n][j], bg)) {
 				nums[pos] = j;
 				pos++;
@@ -414,23 +403,22 @@ public class Tablero implements Serializable{
 	}
 
 	 /**
-	 * Valida que el buffo se active en la posicion indicada
+	 * Si el bloque está sobre la posición, lo activa
 	 */
-
 	public void validateBuffo(int x, int y) {
-		// Ver la posicion del buffo
+		Buffo buffo = buffos.peek();
 		if(buffo != null) {
-			//get alturas, retorna la altura de cada 
-			for(int[] c :block.getCoordenadas()) {
-				if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
-					buffo.activate(this);
-					buffo = null;
-					break;
-				}
-			}			
-		}
-	}
+				//get alturas, retorna la altura de cada
+				for(int[] c :block.getCoordenadas()) {
+					if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
+						 buffo.activate(tableros, this.Id);
+						 buffos.poll();
+						 break;
+					 }
+				 }
+			}
 
+	}
 	public void setMovilidadBlock(boolean p) {
 		if(block != null) block.setMovilidad(p);
 	}
@@ -440,11 +428,10 @@ public class Tablero implements Serializable{
 	}
 
 	public int[] getPositionBlock(){
-		return new int[]{block.getX(), block.getY()};
-	}
-
-	public int getTiempo() {
-		return tiempo;
+		int[] position = null;
+		if (block != null)
+			position = new int[]{block.getX(), block.getY()};
+		return position;
 	}
 
 	/*
@@ -463,6 +450,29 @@ public class Tablero implements Serializable{
 
 	public void setVelocidad(int v) {
 		velocidad = v;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sRta = new StringBuilder();
+		sRta.append("{\"background\": [");
+
+		for (int j = 0; j < background.length; j++) {
+			sRta.append(String.format("[%s]", String.join(", ",
+					Arrays.stream(background[j]).map(s -> String.format("\"%s\"", s)).toArray(String[]::new))));
+			if (j != background.length -1) sRta.append(",");
+		}
+		sRta.append("]");
+		sRta.append(",\"bgReborde\": [");
+		for (int i = 0; i < bgReborde.length; i++) {
+			sRta.append(String.format("[%s]", String.join(", ",
+					Arrays.stream(bgReborde[i]).map(r -> r== null ? null: r.toString()).toArray(String[]::new))));
+			if (i != bgReborde.length -1) sRta.append(",");
+		}
+		sRta.append("]");
+		sRta.append("}");
+		return sRta.toString();
+
 	}
 }
 

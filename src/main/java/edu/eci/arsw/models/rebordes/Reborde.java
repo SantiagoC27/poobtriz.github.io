@@ -71,5 +71,10 @@ public abstract class Reborde implements Cloneable, Serializable{
 
 	public abstract boolean modifyShape();
 
-
+	@Override
+	public String toString() {
+		return "{" +
+				String.format("\"color\": \"%s\"", color) +
+				"}";
+	}
 }
