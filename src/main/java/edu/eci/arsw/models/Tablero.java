@@ -106,9 +106,8 @@ public class Tablero implements Serializable{
 	 * Genera un tetromino aleatorio con color distinto al del fondo del tablero.
 	 */
 	public void spawnBlock() {
-		bloquesUsados++;
-		if(bloquesUsados > bloques.size()) bloques.add(BloqueTetris.getRandomBlock(bloquesUsados, bg));
-		block = bloques.get(bloquesUsados - 1);
+		if(bloquesUsados <= bloques.size()) bloques.add(BloqueTetris.selectRandomBlock(bg));
+		block = bloques.get(bloquesUsados).Clone();
 		block.spawn(background[0].length);
 	}
 
@@ -134,8 +133,11 @@ public class Tablero implements Serializable{
 	 */
 
 	private void calculateFinGame(){
-		BloqueTetris b = BloqueTetris.getRandomBlock(bloquesUsados, bg);
-		if(block == null && Colision(1, 0, b)) finGame = true;
+		BloqueTetris b = BloqueTetris.selectRandomBlock(bg);
+		if(block == null && Colision(1, 0, b)) {
+			finGame = true;
+		}
+
 	}
 
 
@@ -202,7 +204,10 @@ public class Tablero implements Serializable{
 					break;
 			}
 			if (moved) moveBlockToBackground();
-			else calculatePuntuacion();
+			else {
+				calculatePuntuacion();
+				bloquesUsados++;
+			}
 		}
 		calculateFinGame();
 

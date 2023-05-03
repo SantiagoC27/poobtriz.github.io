@@ -33,23 +33,17 @@ public class GameSession extends Thread{
         this.gt.start();
         while (gt.isAlive()){
             try {
-                if (!playersMoved.get()) playersMoved.wait();
-
-                playersMoved.set(false);
-                broadcast();
+                synchronized (playersMoved){
+                    if (!playersMoved.get()) playersMoved.wait();
+                    playersMoved.set(false);
+                    broadcast();
+                }
             } catch (InterruptedException ignored) {}
         }
-
     }
 
     public void moveBlock(String user, String movement){
-        while (gt.isAlive()){
-            if (playersMoved.get()){
-                GameModifyThread gmt = new GameModifyThread(gt, user, movement);
-                gmt.start();
-            }
-        }
-        this.gt.moveBlock(user, movement);
+        gt.moveBlock(user, movement);
         broadcast();
     }
 

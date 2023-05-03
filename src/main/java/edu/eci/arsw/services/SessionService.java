@@ -22,6 +22,7 @@ public class SessionService {
 
         for (Player p: lobby.getPlayers()) {
             Session aux = allSessions.get(p.getNick());
+
             if (aux != null) session.put(p.getNick(), aux);
             else if (throwing) throw new TetrisException(TetrisException.INVALID_SESSION);
         }

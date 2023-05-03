@@ -13,7 +13,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public static int[][][] formas ={{{1,1}, {1,1}}, {{1,0}, {1,0}, {1,1}}, {{1,1,1,1}},
 									{{1,1,1}, {0,1,0}}, {{1,1,0}, {0,1,1}} };
 	public static String[] colores= {"magenta", "blue", "pink", "orange", "indigo"};
-	private final static List<BloqueTetris> bloquesShared = new ArrayList<>();
 	private int[][] shape;
 	
 	private final String color;
@@ -182,26 +181,11 @@ public class BloqueTetris implements Cloneable, Serializable {
 	/**
 	 * Genera un bloque de tetris aleatorio en forma color y reborde
 	 */
-	private static BloqueTetris selectRandomBlock(String bg) {
+	public static BloqueTetris selectRandomBlock(String bg) {
 		int n = new Random().nextInt(formas.length);
 		if (Objects.equals(colores[n], bg)) return selectRandomBlock(bg);
 		Reborde r = Reborde.randomReborde();
 		return new BloqueTetris(formas[n],r, colores[n], n);
-	}
-
-
-	 /**
-	 * Toma un bloque del arreglo de bloques
-	 * @param pos de la cualse quiere tomar
-	  * @param bg Color que no puede ser tomado
-	 * @return el bloque
-	 */
-	public static BloqueTetris getRandomBlock(int pos, String bg) {//======>==================================== meter la secuencia q me salio
-			while(pos >= bloquesShared.size()) {
-				BloqueTetris bloqueAleatorio = selectRandomBlock(bg);
-				bloquesShared.add(bloqueAleatorio);				
-			}
-		return  bloquesShared.get(pos).Clone();
 	}
 	
 	private void setShape() {
