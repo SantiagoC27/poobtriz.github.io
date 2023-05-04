@@ -245,9 +245,8 @@ public class Tablero implements Serializable{
 				}
 				if(lineFilled && isBorrable(r)) {
 					linesCleared++;
-					clearLine(r,0,background[0].length);
+					clearLine(r,background[0].length);
 					shiftDown(r);
-					clearLine(0,0,background[0].length);
 					r++;
 				}
 			}
@@ -259,16 +258,15 @@ public class Tablero implements Serializable{
 	 * Limpia las lineas del tablero, y en base a esto agrega una puntuación.
 	 */
 	public void calculatePuntuacion(){
-		int linesCleared = this.clearLines();
-		this.addPuntuacion(linesCleared*10);
+		this.addPuntuacion(this.clearLines());
 	}
 
 	/** 
 	 * Borra una linea del tablero
 	 * @param r es el numero de la fila
 	*/
-	private void clearLine(int r, int ini, int fin) {
-		for(int i = ini; i < fin; i++) {
+	private void clearLine(int r, int fin) {
+		for(int i = 0; i < fin; i++) {
 			background[r][i] = bg;
 			bgReborde[r][i] = null;
 		}	
@@ -353,6 +351,7 @@ public class Tablero implements Serializable{
 		boolean borrable = true; 
 		for(int i = 0; i < background[0].length; i++) {
 			if(bgReborde[fil][i] != null && !bgReborde[fil][i].isBorrable()) {
+				System.out.println("reborde no permite borrar " + fil);
 				borrable = false;
 				break;
 			}
@@ -373,7 +372,7 @@ public class Tablero implements Serializable{
 		}							
 	}
 	
-	public void addPuntuacion(int linesCleared) {
+	private void addPuntuacion(int linesCleared) {
 		puntuacion.set(puntuacion.get() + (linesCleared*10));
 	}
 
@@ -470,6 +469,7 @@ public class Tablero implements Serializable{
 			if (i != bgReborde.length -1) sRta.append(",");
 		}
 		sRta.append("]");
+		sRta.append(String.format(",\"puntuacion\": %d", puntuacion.get()));
 		sRta.append("}");
 		return sRta.toString();
 

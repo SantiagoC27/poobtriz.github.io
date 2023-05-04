@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -63,25 +64,34 @@ public class TableroTest {
 	@Test
 	public void testClearLines() {
 		//Fill two lines completed
+		String[][] expected = new String[][]{
+				new String[]{t.getBg(), t.getBg(), t.getBg(), t.getBg(),t.getBg(), t.getBg(), t.getBg(), t.getBg(), t.getBg(), t.getBg()},
+				new String[]{t.getBg(), t.getBg(), t.getBg(), t.getBg(),t.getBg(), t.getBg(), t.getBg(), t.getBg(), t.getBg(), t.getBg()},
+				new String[]{t.getBg(), t.getBg(), t.getBg(), t.getBg(),t.getBg(), t.getBg(), t.getBg(), t.getBg(), t.getBg(), "red"},
+				new String[]{t.getBg(), t.getBg(), t.getBg(), t.getBg(),t.getBg(), "red", t.getBg(), t.getBg(), t.getBg(), t.getBg()},
+				new String[]{"red", "red", "red", "red", "red", "red", "red", "red", "red", t.getBg()},
+				new String[]{"red", "red", "red", "red", "red", t.getBg(), "red", "red", "red", "red"}
+				};
 		for(int i = 0; i < cols; i++) {
 			t.background[filas-1][i] = "red";
 			t.background[filas-2][i] = "red";
 			t.background[filas-3][i] = "red";
+			t.background[filas-5][i] = "red";
 		}
+		//obstacles
+		t.background[filas-4][cols/2] = "red";
+		t.background[filas-6][cols-1] = "red";
 		// Line not completed
 		t.background[filas-3][cols-1] = t.getBg();
+		t.background[filas-1][cols/2] = t.getBg();
+		t.calculatePuntuacion();
+		assertEquals(20,t.getPuntuacion().get());
 
-
-		t.clearLines();
-		for(int j = 0; j < cols; j++) {
-			assertEquals(t.background[filas-2][j], t.getBg());
-			assertEquals(t.background[filas-3][j], t.getBg());
+		//System.out.println(Arrays.deepToString(t.background).replaceAll("],", "],\n"));
+		for (int i = 1; i < expected.length; i++) {
+			assertArrayEquals(expected[expected.length - i], t.background[filas - i]);
 		}
 
-		//Line doesn't cleared
-		for (int k = 0; k < cols - 1; k++) {
-			assertEquals(t.background[filas-1][k], "red");
-		}
 	}
 
 
@@ -89,17 +99,6 @@ public class TableroTest {
 	public void testRotarBlock() {
 		// TODO Terminar
 	}
-
-
-	@Test
-	public void DeberiaSumarPuntuacion(){
-		for(int i = 0; i <= 9; i++) {
-			t.background[19][i] = "red";
-		}
-		t.addPuntuacion(t.clearLines());
-		assertEquals(10, t.getPuntuacionBloques());
-	}
-
 	public void colisionTest(){
 		//TODO realizar test
 	}

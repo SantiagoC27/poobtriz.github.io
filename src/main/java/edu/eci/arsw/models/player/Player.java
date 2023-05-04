@@ -3,7 +3,6 @@ package edu.eci.arsw.models.player;
 import java.io.Serializable;
 
 import edu.eci.arsw.models.Tablero;
-import edu.eci.arsw.shared.TetrisException;
 import lombok.Setter;
 
 
@@ -43,9 +42,13 @@ public class Player implements Serializable {
 		return color;
 	}
 
-	public boolean moveBlock(String movement) throws TetrisException {
-		synchronized (tablero){
-			return tablero.moveBlock(movement.toUpperCase());
+	public void moveBlock(String movement){
+		try{
+			synchronized (tablero){
+				tablero.moveBlock(movement.toUpperCase());
+			}
+		}catch (Exception e){
+			e.printStackTrace();
 		}
 
 	}
