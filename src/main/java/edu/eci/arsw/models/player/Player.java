@@ -3,13 +3,12 @@ package edu.eci.arsw.models.player;
 import java.io.Serializable;
 
 import edu.eci.arsw.models.Tablero;
-import edu.eci.arsw.shared.TetrisException;
 import lombok.Setter;
 
 
 
-public abstract class Player implements Serializable {
-@Setter
+public class Player implements Serializable {
+	@Setter
 	private String nick;
 	@Setter
 	protected Tablero tablero;
@@ -24,6 +23,10 @@ public abstract class Player implements Serializable {
 		this.tablero = null;
 	}
 
+	public Tablero getTablero(){
+		return this.tablero;
+	}
+
 	public Player(){
 		this.nick = "";
 		this.tablero = null;
@@ -33,18 +36,39 @@ public abstract class Player implements Serializable {
 		return nick;
 	}
 
-	public boolean moveBlock(String movement) throws TetrisException {
-		return tablero.moveBlock(movement.toUpperCase());
+	public String getColorTablero(){
+		String color = null;
+		if (tablero != null) color = tablero.getBg();
+		return color;
+	}
+
+	public void moveBlock(String movement){
+		try{
+			synchronized (tablero){
+				tablero.moveBlock(movement.toUpperCase());
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+
 	}
 
 	public boolean hasFinished() {
+		boolean finished = true;
 		if (tablero != null)
-			return tablero.hasFinished();
-		return true;
+			finished = tablero.hasFinished();
+		return finished;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("{\"nick\": \"%s\"}", nick);
+		StringBuilder sRta = new StringBuilder();
+		sRta.append(String.format("{\"nick\": \"%s\"", nick));
+		if (tablero != null){
+			sRta.append(String.format(",\"tablero\": %s", tablero));
+		}
+		sRta.append("}");
+		return sRta.toString();
 	}
+
 }

@@ -1,5 +1,4 @@
 package edu.eci.arsw.models.rebordes;
-import java.awt.Color;
 
 public class RebordeP extends Reborde{
 	//useless
