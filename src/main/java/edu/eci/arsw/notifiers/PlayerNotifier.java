@@ -27,4 +27,8 @@ public class PlayerNotifier {
 
 
     }
+
+    public boolean isEmptyCoord(int[] coord) {
+        return player.isEmptyCoord(coord);
+    }
 }
