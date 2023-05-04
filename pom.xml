@@ -94,6 +94,12 @@
       <version>1.1</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Conocer subclases de una superclase https://mvnrepository.com/artifact/org.reflections/reflections -->
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.10.2</version>
+    </dependency>
 
   </dependencies>
 

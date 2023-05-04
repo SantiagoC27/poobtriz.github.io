@@ -6,14 +6,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.websocket.Session;
-
-import com.google.gson.Gson;
-
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.services.LobbyService;
 
 public class GameSession extends Thread{
-    private static final Gson gson = new Gson();
     private final LobbyService lobbyService;
 
     private Lobby lobby;
@@ -36,16 +32,18 @@ public class GameSession extends Thread{
     public void run(){
         this.gt.start();
         while (gt.isAlive()){
-            if (playersMoved.get()){
-                playersMoved.set(false);
-                broadcast();
-            }
+            try {
+                synchronized (playersMoved){
+                    if (!playersMoved.get()) playersMoved.wait();
+                    playersMoved.set(false);
+                    broadcast();
+                }
+            } catch (InterruptedException ignored) {}
         }
-
     }
 
     public void moveBlock(String user, String movement){
-        this.gt.moveBlock(user, movement);
+        gt.moveBlock(user, movement);
         broadcast();
     }
 
@@ -59,7 +57,7 @@ public class GameSession extends Thread{
     private void broadcast() {
         // TODO find out https://www.baeldung.com/gson-exclude-fields-serialization
         List<String> failed = new ArrayList<>();
-        sessions.forEach((key, value) -> value.getAsyncRemote().sendObject(gson.toJson(lobby), result -> {
+        sessions.forEach((key, value) -> value.getAsyncRemote().sendObject(lobby.toString(), result -> {
             if (result.getException() != null) failed.add(key);
         }));
         failed.forEach(this::dropUser);

@@ -1,27 +1,31 @@
 package edu.eci.arsw.threads;
 
-import com.google.gson.Gson;
 import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.Estado;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.Tablero;
-import edu.eci.arsw.models.player.Jugador;
+import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.player.Player;
+import edu.eci.arsw.notifiers.PlayerNotifier;
 import edu.eci.arsw.shared.TetrisException;
 
-import javax.websocket.Session;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class GameThread extends Thread{
 
-
     private final Lobby lobby;
     private final AtomicBoolean playersMoved;
-    private List<BloqueTetris> bloques;
+
+    private final AtomicBoolean endGame = new AtomicBoolean(false);
+
+    private final List<PlayerNotifier> players = new ArrayList<>();
+
+    private final Thread tbuffos;
+
+    private final ConcurrentLinkedQueue<Buffo> buffos =new ConcurrentLinkedQueue<>();
 
     public int getCodigo(){
         return lobby.getCodigo();
@@ -30,28 +34,39 @@ public class GameThread extends Thread{
     public GameThread(Lobby lobby, AtomicBoolean playersMoved){
         this.lobby = lobby;
         this.playersMoved = playersMoved;
+        this.tbuffos = new Thread(new BuffosThread(buffos, 10000, lobby.getFilas(),
+                lobby.getCols(), lobby.getColorsTableros(), endGame));
     }
 
     @Override
     public void run(){
         instanceGame();
-        int velocidad = 1000; // TODO dinamizar
+        tbuffos.start();
         while(!lobby.endGame()){
-            for (Player player: lobby.getPlayers()) {
+            for (PlayerNotifier player : players) {
                 try {
-                    if(!player.moveBlock("DOWN")){
-                        System.out.println("a");
+                    synchronized (player.getMoved()){
+                        player.getMoved().set(false);
+                        player.moveBlock("DOWN");
+                        player.getMoved().set(true);
+                        player.getMoved().notify();
                     }
-                }catch (TetrisException e){}
+                }catch (TetrisException ex){
+                    ex.printStackTrace();
+                }
             }
-            playersMoved.set(true);
+            synchronized (playersMoved){
+                playersMoved.set(true);
+                playersMoved.notify();
+            }
 
             try {
-                Thread.sleep(velocidad);
+                Thread.sleep(lobby.getVelocity());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+        endGame.set(true);
         lobby.setEstado(Estado.FINISHED);
     }
 
@@ -60,33 +75,28 @@ public class GameThread extends Thread{
      * Inicializa los tableros de los jugadores con una misma lista de bloques
      */
     private void instanceGame(){
-        bloques = Collections.synchronizedList(new ArrayList<>());
-        Tablero t;
-        for (Player player: lobby.getPlayers()) {
-            // TODO dinamizar parametros
-            t = new Tablero(true, 1000, "yellow", 12, 10, bloques);
-            player.setTablero(t);
+        List<BloqueTetris> bloques = Collections.synchronizedList(new ArrayList<>());
+        List<Tablero> tableros = new ArrayList<>();
+        Player player;
+
+        for (int i = 0; i < lobby.getPlayers().size(); i++) {
+             player = lobby.getPlayers().get(i);
+            tableros.add(new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
+                    lobby.getFilas(), lobby.getCols(), bloques, buffos, tableros));
+            player.setTablero(tableros.get(i));
+            players.add(new PlayerNotifier(player, new AtomicBoolean(false)));
         }
         lobby.setEstado(Estado.RUNNING);
-
-
-    }
-
-
-    public static void main(String[] args) throws Exception{
-        Lobby l = new Lobby(1);
-        l.addPlayer(
-                new Jugador("x", new Tablero(true, 1000, "red", 20, 10, Collections.synchronizedList(new ArrayList<>()))));
-        Thread gt = new Thread(new GameThread(l, new AtomicBoolean()));
-        gt.start();
     }
 
     public void moveBlock(String username, String movement) {
-        Player player = lobby.getPlayers().stream().filter(p -> Objects.equals(p.getNick(), username)).collect(Collectors.toList()).get(0);
-            try{
-                player.moveBlock(movement.toUpperCase());
-            }catch (TetrisException e){
-                e.printStackTrace();
-            }
+        PlayerNotifier playerNot = players.stream().filter(p -> Objects.equals(p.getPlayer().getNick(), username))
+                .collect(Collectors.toList()).get(0);
+        try {
+            GameModifyThread gmt = new GameModifyThread(playerNot, movement);
+            gmt.start();
+            gmt.join();
+        } catch (InterruptedException ignored) {}
     }
 }
+

@@ -17,7 +17,7 @@ public class LobbyController {
     LobbyService lobbyS = new LobbyService();
 
     Gson gson = new GsonBuilder()
-            .registerTypeAdapter(Player.class, new PlayerTypeAdapter())
+            //.registerTypeAdapter(Player.class, new PlayerTypeAdapter())
             .create();
 
 
@@ -35,9 +35,6 @@ public class LobbyController {
     @POST
     public Lobby crearLobby(String sLobby) {
         Lobby lobby = gson.fromJson(sLobby, Lobby.class);
-        if (lobby.getPlayers().size() < 1) {
-            throw new WebApplicationException("Debe haber al menos un jugador en el lobby", 400);
-        }
         lobbyS.create(lobby);
         return lobby;
     }

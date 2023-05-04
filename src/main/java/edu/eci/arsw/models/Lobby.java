@@ -1,12 +1,12 @@
 package edu.eci.arsw.models;
 
-import edu.eci.arsw.models.player.Player;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import edu.eci.arsw.models.player.Player;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class Lobby {
@@ -16,20 +16,36 @@ public class Lobby {
     @Setter
     private Estado estado;
 
-    private List<Player> players;
+    @Setter
+    private Player admin;
 
-    public Lobby(int codigo){
+    private int filas;
+
+    private int cols;
+
+    private int velocity;
+
+    private final List<Player> players;
+
+    public Lobby(int codigo, int filas, int cols, int velocity, Player admin){
         this.codigo = codigo;
         this.estado = Estado.CREATED;
         this.players = new ArrayList<>();
+        this.filas = filas;
+        this.cols = cols;
+        this.velocity = velocity;
+        this.admin = admin;
+        players.add(this.admin);
+
+    }
+
+    public Lobby(){
+        players = new ArrayList<>();
+        this.admin = null;
     }
 
     public int getCode() {
         return codigo;
-    }
-
-    public void setCode(int codigo) {
-        this.codigo = codigo;
     }
 
     public Estado getStatus() {
@@ -45,7 +61,7 @@ public class Lobby {
     }
 
     public void addPlayer(Player p){
-        if (!this.players.stream().anyMatch(player -> player.getNick().equals(p.getNick())))
+        if (this.players.stream().noneMatch(player -> player.getNick().equals(p.getNick())))
             this.players.add(p);
     }
     
@@ -65,16 +81,29 @@ public class Lobby {
         players.remove(index);
     }
 
+    public List<String> getColorsTableros(){
+        List<String> colors = new ArrayList<>();
+        for (Player p : players) {
+            colors.add(p.getColorTablero());
+        }
+        return colors;
+    }
+    
     @Override
     public String toString() {
-
-        StringBuilder rta = new StringBuilder(String.format("{\"codigo\": %d, \"players\": [", codigo));
+        StringBuilder rta = new StringBuilder(String.format("{\"codigo\": %d, \"estado\": \"%s\", \"players\": [",
+                codigo, estado.toString()));
         for (int i = 0; i < players.size(); i++) {
             rta.append(players.get(i).toString());
             if (i != players.size()-1) rta.append(",");
         }
-
-        rta.append("]}");
+        
+        rta.append("]");
+        if (admin != null){
+            rta.append(String.format(", \"admin\": {\"nick\": \"%s\"}", admin.getNick()));
+        }
+        rta.append("}");
+        
         return rta.toString();
     }
 }

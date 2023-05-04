@@ -19,6 +19,7 @@ import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.SessionService;
 import edu.eci.arsw.shared.TetrisException;
+import edu.eci.arsw.threads.GameModifyThread;
 import edu.eci.arsw.threads.GameSession;
 
 @ServerEndpoint(value ="/game/{username}/{codigo}")
@@ -37,7 +38,7 @@ public class GameSocket {
             sessions.put(username, session);
             Lobby l = lobbyService.get(codigo);
 
-            // if doesnt throws, the sessions is completed
+            // if it doesn't throw, the session is completed
             Map<String, Session> lobbySessions = SessionService.getSessions(l, sessions, true);
             GameSession game = new GameSession(l, lobbySessions, lobbyService);
             game.start();
@@ -67,9 +68,10 @@ public class GameSocket {
     @OnMessage
     public void onMessage(String message, @PathParam("username") String username, @PathParam("codigo") int codigo){
         List<GameSession> gSessions = games.stream().filter( g -> g.getCodigoLobby() == codigo).collect(Collectors.toList());
+
         if(gSessions.size() > 0){
             GameSession gs = gSessions.get(0);
-            gs.moveBlock(username, message);
+            if (gs.isAlive()) gs.moveBlock(username, message);
         }
     }
 
