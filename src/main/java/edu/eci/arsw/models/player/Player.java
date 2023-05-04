@@ -1,6 +1,7 @@
 package edu.eci.arsw.models.player;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.shared.TetrisException;
@@ -68,4 +69,7 @@ public class Player implements Serializable {
 		return sRta.toString();
 	}
 
+	public boolean isEmptyCoord(int[] coord) {
+		return Objects.equals(tablero.background[coord[0]][coord[1]], tablero.getBg());
+	}
 }

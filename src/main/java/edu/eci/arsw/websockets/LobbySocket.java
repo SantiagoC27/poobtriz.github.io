@@ -1,6 +1,7 @@
 package edu.eci.arsw.websockets;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,7 +38,7 @@ public class LobbySocket {
             Map<String, Session> lobbySessions = SessionService.getSessions(l, sessions, false);
             
             broadcast(l.toString(), lobbySessions);
-        }catch (TetrisException ignored){}
+        }catch (TetrisException e){ e.printStackTrace();}
 
 
     }
@@ -56,6 +57,7 @@ public class LobbySocket {
 
     @OnError
     public void onError(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo, Throwable throwable) {
+        throwable.printStackTrace();
         System.out.println("Error" + throwable.getMessage());
     }
 

@@ -9,8 +9,8 @@ import lombok.Getter;
 @Getter
 public abstract class Buffo implements Serializable{
 	protected String color;
-	private int x;
-	private int y;
+	private final int x;
+	private final int y;
 
 	public Buffo(int[] c) {
 		x = c[0];
@@ -21,5 +21,9 @@ public abstract class Buffo implements Serializable{
 	 * Activa el buffo
 	 */
 	public abstract void activate(List<Tablero> tableros,int idTablero);
-	
+
+	@Override
+	public String toString() {
+		return String.format("{\"color\": \"%s\", \"x\": %d, \"y\": %d}", color, x, y);
+	}
 }

@@ -3,10 +3,10 @@ package edu.eci.arsw.models;
 import java.io.Serializable;
 import java.util.*;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.eci.arsw.models.buffos.Buffo;
+import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.TetrisException;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import lombok.Getter;
 public class Tablero implements Serializable{
 
 	private final int Id;
-	private final ConcurrentLinkedQueue<Buffo> buffos;
+	private final CommonBuffo buffo;
 	private final List<Tablero> tableros;
 	private final List<BloqueTetris> bloques;
 
@@ -33,8 +33,8 @@ public class Tablero implements Serializable{
 
 	private boolean finGame = false;
 	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques,
-				   ConcurrentLinkedQueue<Buffo> buffos, List<Tablero> tableros) {
-		this.buffos = buffos;
+				   CommonBuffo b, List<Tablero> tableros) {
+		this.buffo = b;
 		this.bloques = bloques;
 		this.bg = bg;
 		Tablero.uniforme = uniforme;
@@ -47,7 +47,7 @@ public class Tablero implements Serializable{
 	}
 
 	public Tablero(){
-		this.buffos = new ConcurrentLinkedQueue<>();
+		buffo = new CommonBuffo();
 		this.bloques = new ArrayList<>();
 		this.bg = "yellow";
 		Tablero.uniforme = true;
@@ -406,18 +406,18 @@ public class Tablero implements Serializable{
 	 * Si el bloque está sobre la posición, lo activa
 	 */
 	public void validateBuffo(int x, int y) {
-		Buffo buffo = buffos.peek();
-		if(buffo != null) {
-				//get alturas, retorna la altura de cada
+		if(buffo.get() != null) {
+			synchronized (buffo.get()){
 				for(int[] c :block.getCoordenadas()) {
 					if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
-						 buffo.activate(tableros, this.Id);
-						 buffos.poll();
-						 break;
-					 }
-				 }
-			}
-
+						System.out.println(this.Id + " activa el buffo");
+						buffo.activate(tableros, this.Id);
+						buffo.set(null);
+						break;
+					}
+				}
+		}
+		}
 	}
 	public void setMovilidadBlock(boolean p) {
 		if(block != null) block.setMovilidad(p);
@@ -452,6 +452,14 @@ public class Tablero implements Serializable{
 		velocidad = v;
 	}
 
+	public Buffo getBuffo(){
+		return buffo.get();
+	}
+
+	public void setBuffo(Buffo b){
+		this.buffo.set(b);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sRta = new StringBuilder();
@@ -470,6 +478,7 @@ public class Tablero implements Serializable{
 			if (i != bgReborde.length -1) sRta.append(",");
 		}
 		sRta.append("]");
+		if (buffo.get() != null) sRta.append(", \"buffo\": ").append(buffo.get().toString());
 		sRta.append("}");
 		return sRta.toString();
 

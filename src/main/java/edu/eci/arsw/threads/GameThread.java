@@ -4,13 +4,13 @@ import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.Estado;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.models.Tablero;
-import edu.eci.arsw.models.buffos.Buffo;
+import edu.eci.arsw.models.buffos.CommonBuffo;
+import edu.eci.arsw.models.buffos.factories.BuffoFactory;
 import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.notifiers.PlayerNotifier;
 import edu.eci.arsw.shared.TetrisException;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -19,13 +19,14 @@ public class GameThread extends Thread{
     private final Lobby lobby;
     private final AtomicBoolean playersMoved;
 
-    private final AtomicBoolean endGame = new AtomicBoolean(false);
-
     private final List<PlayerNotifier> players = new ArrayList<>();
 
-    private final Thread tbuffos;
+    private final TimerTask genBuffo;
+    private final Timer timer;
 
-    private final ConcurrentLinkedQueue<Buffo> buffos =new ConcurrentLinkedQueue<>();
+    private final List<String> colorsTableros;
+
+    private final CommonBuffo b = new CommonBuffo();
 
     public int getCodigo(){
         return lobby.getCodigo();
@@ -34,14 +35,15 @@ public class GameThread extends Thread{
     public GameThread(Lobby lobby, AtomicBoolean playersMoved){
         this.lobby = lobby;
         this.playersMoved = playersMoved;
-        this.tbuffos = new Thread(new BuffosThread(buffos, 10000, lobby.getFilas(),
-                lobby.getCols(), lobby.getColorsTableros(), endGame));
+        this.colorsTableros = lobby.getColorsTableros();
+        timer = new Timer();
+        genBuffo = instanceBuffosTask();
     }
+
 
     @Override
     public void run(){
         instanceGame();
-        tbuffos.start();
         while(!lobby.endGame()){
             for (PlayerNotifier player : players) {
                 try {
@@ -66,7 +68,9 @@ public class GameThread extends Thread{
                 throw new RuntimeException(e);
             }
         }
-        endGame.set(true);
+        System.out.println("end");
+        genBuffo.cancel();
+        timer.cancel();
         lobby.setEstado(Estado.FINISHED);
     }
 
@@ -82,10 +86,11 @@ public class GameThread extends Thread{
         for (int i = 0; i < lobby.getPlayers().size(); i++) {
              player = lobby.getPlayers().get(i);
             tableros.add(new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
-                    lobby.getFilas(), lobby.getCols(), bloques, buffos, tableros));
+                    lobby.getFilas(), lobby.getCols(), bloques, b, tableros));
             player.setTablero(tableros.get(i));
             players.add(new PlayerNotifier(player, new AtomicBoolean(false)));
         }
+        timer.schedule(genBuffo, 5000, 5000);
         lobby.setEstado(Estado.RUNNING);
     }
 
@@ -98,5 +103,43 @@ public class GameThread extends Thread{
             gmt.join();
         } catch (InterruptedException ignored) {}
     }
+
+    private TimerTask instanceBuffosTask(){
+        return new TimerTask() {
+            public void run() {
+                int iteraciones = 0;
+                this.instanceBuffo(iteraciones);
+            }
+
+            private void instanceBuffo(int iteraciones){
+                int[] c = this.getCoord();
+                if (this.isEmptyCoord(c) || iteraciones >= 10) b.set(BuffoFactory.getRandomBuffo(c, colorsTableros));
+                else instanceBuffo(iteraciones);
+            }
+
+            private int[] getCoord(){
+                return new int[]{(int) (Math.random()*lobby.getFilas()), (int) (Math.random()*lobby.getCols())};
+            }
+
+            private boolean isEmptyCoord(int[] coord) {
+                boolean isEmpty = true;
+                int i = 0;
+                while (i < players.size()){
+                    PlayerNotifier p = players.get(i);
+                    synchronized (p.getMoved()){
+                        if (p.isEmptyCoord(coord)) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                    i++;
+                }
+                return isEmpty;
+            }
+        };
+
+    }
+
+
 }
 
