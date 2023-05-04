@@ -90,7 +90,7 @@ public class GameThread extends Thread{
             player.setTablero(tableros.get(i));
             players.add(new PlayerNotifier(player, new AtomicBoolean(false)));
         }
-        timer.schedule(genBuffo, 5000, 5000);
+        timer.schedule(genBuffo, 10000, 10000);
         lobby.setEstado(Estado.RUNNING);
     }
 

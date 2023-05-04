@@ -93,7 +93,7 @@ public class PlayerTypeAdapter extends TypeAdapter<Player> {
                         
                      if (tableroAttribute.equals("velocidad")) {
                          player.getTablero().setVelocidad(in.nextInt());
-                    }else if (tableroAttribute.equals("puntuacion")) player.getTablero().addPuntuacion(in.nextInt());
+                    }
 
                     else in.skipValue();
                         
