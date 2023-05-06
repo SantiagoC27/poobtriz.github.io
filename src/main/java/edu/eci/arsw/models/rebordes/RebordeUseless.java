@@ -1,11 +1,13 @@
 package edu.eci.arsw.models.rebordes;
 
-public class RebordeP extends Reborde{
-	//useless
-	public RebordeP() {
+
+/**
+ * Si se completa una línea con este bloque, la línea no desaparecerá
+ */
+public class RebordeUseless extends Reborde{
+
+	public RebordeUseless() {
 		super("blue");
-		this.color = "blue";
-		
 	}
 	
 	public boolean isBorrable() {

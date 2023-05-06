@@ -53,7 +53,7 @@ public class GameThread extends Thread{
                         player.getMoved().set(true);
                         player.getMoved().notify();
                     }
-                }catch (TetrisException ex){
+                }catch (Exception ex){
                     ex.printStackTrace();
                 }
             }
@@ -114,7 +114,6 @@ public class GameThread extends Thread{
             private void instanceBuffo(int iteraciones){
                 int[] c = this.getCoord();
                 if (this.isEmptyCoord(c) || iteraciones >= 10) b.set(BuffoFactory.getRandomBuffo(c, colorsTableros));
-                else instanceBuffo(iteraciones);
             }
 
             private int[] getCoord(){

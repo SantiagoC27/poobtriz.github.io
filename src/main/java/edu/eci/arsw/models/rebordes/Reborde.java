@@ -19,7 +19,7 @@ public abstract class Reborde implements Cloneable, Serializable{
 	 * @return el reborde que salga
 	 */
 	public static Reborde randomReborde() {
-		List<String> rebordes = new ArrayList<String>();
+		List<String> rebordes = new ArrayList<>();
 		rebordes.add("N");
 		rebordes.add("P");
 		rebordes.add("D");
@@ -29,20 +29,17 @@ public abstract class Reborde implements Cloneable, Serializable{
 		String tipo = rebordes.get(n);
 		Reborde b;
 		switch (tipo.toUpperCase()) {
-		case "N":
-			b = new RebordeN();
+		case "R":
+			b = new RebordeBomb();
 			break;
 		case "P":
-			b = new RebordeP();
+			b = new RebordeUseless();
 			break;
 		case "D":
-			b = new RebordeD();
-			break;
-		case "R":
-			b = new RebordeR();
+			b = new RebordeWinner();
 			break;
 		default:
-			b = new RebordeR();
+			b = new RebordeClassic();
 		}
 		
 		return b;
