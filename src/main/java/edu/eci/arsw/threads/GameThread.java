@@ -8,7 +8,6 @@ import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.buffos.factories.BuffoFactory;
 import edu.eci.arsw.models.player.Player;
 import edu.eci.arsw.notifiers.PlayerNotifier;
-import edu.eci.arsw.shared.TetrisException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,9 +27,6 @@ public class GameThread extends Thread{
 
     private final CommonBuffo b = new CommonBuffo();
 
-    public int getCodigo(){
-        return lobby.getCodigo();
-    }
 
     public GameThread(Lobby lobby, AtomicBoolean playersMoved){
         this.lobby = lobby;
@@ -57,10 +53,7 @@ public class GameThread extends Thread{
                     ex.printStackTrace();
                 }
             }
-            synchronized (playersMoved){
-                playersMoved.set(true);
-                playersMoved.notify();
-            }
+            notifyPlayersMoved();
 
             try {
                 Thread.sleep(lobby.getVelocity());
@@ -68,12 +61,21 @@ public class GameThread extends Thread{
                 throw new RuntimeException(e);
             }
         }
-        System.out.println("end");
+        System.out.println("Acabo 1\n");
         genBuffo.cancel();
         timer.cancel();
         lobby.setEstado(Estado.FINISHED);
+        System.out.println("Acabo 2\n");
+        notifyPlayersMoved();
     }
 
+
+    private void notifyPlayersMoved(){
+        synchronized (playersMoved){
+            playersMoved.set(true);
+            playersMoved.notify();
+        }
+    }
 
     /**
      * Inicializa los tableros de los jugadores con una misma lista de bloques

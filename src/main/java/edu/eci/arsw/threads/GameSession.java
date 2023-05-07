@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.websocket.Session;
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.services.LobbyService;
+import edu.eci.arsw.services.SessionService;
+import edu.eci.arsw.shared.TetrisException;
 
 public class GameSession extends Thread{
     private final LobbyService lobbyService;
@@ -19,9 +21,9 @@ public class GameSession extends Thread{
 
     private final AtomicBoolean playersMoved;
 
-    public GameSession(Lobby lobby, Map<String, Session> allSessions, LobbyService lobbyService){
+    public GameSession(Lobby lobby, Map<String, Session> allSessions, LobbyService lobbyService) throws TetrisException {
         this.lobby = lobby;
-        this.sessions = allSessions;
+        this.sessions = SessionService.getSessions(lobby, allSessions, true);
         this.playersMoved = new AtomicBoolean(false);
         this.lobbyService = lobbyService;
         gt =new GameThread(this.lobby, this.playersMoved);
@@ -31,15 +33,17 @@ public class GameSession extends Thread{
     @Override
     public void run(){
         this.gt.start();
-        while (gt.isAlive()){
-            try {
-                synchronized (playersMoved){
-                    if (!playersMoved.get()) playersMoved.wait();
-                    playersMoved.set(false);
-                    broadcast();
-                }
-            } catch (InterruptedException ignored) {}
-        }
+        try {
+            while (gt.isAlive()){
+                    synchronized (playersMoved){
+                        if (!playersMoved.get()) playersMoved.wait();
+                        playersMoved.set(false);
+                        broadcast();
+                    }
+            }
+            System.out.println("Session finished");
+            SessionService.closeSessions(lobby, sessions);
+        } catch (Exception ignored) {}
     }
 
     public void moveBlock(String user, String movement){
@@ -55,7 +59,6 @@ public class GameSession extends Thread{
      * Emite a los usuarios de la sesión el lobby en formato string
      */
     private void broadcast() {
-        // TODO find out https://www.baeldung.com/gson-exclude-fields-serialization
         List<String> failed = new ArrayList<>();
         sessions.forEach((key, value) -> value.getAsyncRemote().sendObject(lobby.toString(), result -> {
             if (result.getException() != null) failed.add(key);
