@@ -106,7 +106,7 @@ public class Tablero implements Serializable{
 	 * Genera un tetromino aleatorio con color distinto al del fondo del tablero.
 	 */
 	public void spawnBlock() {
-		if(bloquesUsados <= bloques.size()) bloques.add(BloqueTetris.selectRandomBlock(bg));
+		if(bloquesUsados >= bloques.size()) bloques.add(BloqueTetris.selectRandomBlock(bg, null));
 		block = bloques.get(bloquesUsados).Clone();
 		block.spawn(background[0].length);
 	}
@@ -133,8 +133,9 @@ public class Tablero implements Serializable{
 	 */
 
 	private void calculateFinGame(){
-		BloqueTetris b = BloqueTetris.selectRandomBlock(bg);
-		if(block == null && Colision(1, 0, b)) {
+		BloqueTetris b = BloqueTetris.selectRandomBlock(bg, null);
+		b.spawn(background[0].length);
+		if(Colision(1, 0, b) && (block == null || block.getY() < 0)) {
 			finGame = true;
 		}
 
@@ -188,10 +189,6 @@ public class Tablero implements Serializable{
 			switch (movement.toUpperCase()){
 				case "DOWN":
 					moved = moveBlockDown();
-					if (!moved){
-						moveBlockToBackground();
-						block = null;
-					}
 					break;
 				case "UP":
 					moved = rotarBlock();
@@ -203,15 +200,24 @@ public class Tablero implements Serializable{
 					moved = moveBlockRight();
 					break;
 			}
-			if (moved) moveBlockToBackground();
-			else {
+
+			moveBlockToBackground();
+			if (!moved) {
+				if(block.borrarCercanos()) borrarCercanos();
+				else if(block.modifyShape()) setBlockToIdealForm();
+				block = null;
 				calculatePuntuacion();
 				bloquesUsados++;
+				calculateFinGame();
 			}
 		}
-		calculateFinGame();
 
 		return moved;
+	}
+
+	private void borrarCercanos(){
+		removeBlockFromBackground();
+		updateCuadrosLaterales();
 	}
 	
 	/**
@@ -286,13 +292,16 @@ public class Tablero implements Serializable{
 	 * Pasa los colores del tetromino al tablero
 	*/
 	private void moveBlockToBackground() {
-			for(int[] co :block.getCoordenadas()) {
-				if(co[1] < 0) continue;
-				if(co[1] < background.length && co[0]< background[0].length) {
-					background[co[1]][co[0]] = block.getColor();
-					bgReborde[co[1]][co[0]] = block.getReborde();
+			if (block != null){
+				for(int[] co :block.getCoordenadas()) {
+					if(co[1] < 0) continue;
+					if(co[1] < background.length && co[0]< background[0].length) {
+						background[co[1]][co[0]] = block.getColor();
+						bgReborde[co[1]][co[0]] = block.getReborde();
+					}
 				}
 			}
+
 	}
 
 	/**
@@ -344,14 +353,12 @@ public class Tablero implements Serializable{
 
 
 	/**
-	 * Valida si la el reborde permite borrar la linea donde esta
+	 * Valida si la el reborde permite borrar la linea fil
 	 */
-
 	private boolean isBorrable(int fil) {
 		boolean borrable = true; 
 		for(int i = 0; i < background[0].length; i++) {
 			if(bgReborde[fil][i] != null && !bgReborde[fil][i].isBorrable()) {
-				System.out.println("reborde no permite borrar " + fil);
 				borrable = false;
 				break;
 			}
@@ -365,10 +372,11 @@ public class Tablero implements Serializable{
 	 */
 	private void updateCuadrosLaterales(){
 		for(int[] coord :block.getCoordenadasCercanas()){
-			try {
+			if (coord[1] < background.length && coord[1] >= 0 &&
+					coord[0] < background[0].length && coord[0] >= 0 ){
 				background[coord[1]][coord[0]] = bg;
 				bgReborde[coord[1]][coord[0]] = null;
-			}catch(Exception ignored) {}
+			}
 		}							
 	}
 	
@@ -458,6 +466,110 @@ public class Tablero implements Serializable{
 	public void setBuffo(Buffo b){
 		this.buffo.set(b);
 	}
+
+	/*
+	 * Traduce una matriz de colores a una matriz de ceros y unos
+	 * 1 si ahi puede caber una ficha, 0 si no.
+	 */
+
+	public int[][] toBinaryMatrix() {
+		int[][] rta = new int[5][];
+		int cont = 0;
+		for(int i = block.getY(); i < background.length && i < block.getY() + 4; i++) {
+			int[] aux = new int[background[0].length-block.getX()];
+			for(int j =block.getX(); j < background[0].length && j < block.getX() + 4; j++) {
+				if(i >= 0 && Objects.equals(background[i][j], bg))
+					aux[j-block.getX()] = 1;  else aux[j-block.getX()] = 0;
+			}
+			rta[cont] = aux;
+			cont++;
+		}
+		return rta;
+	}
+
+	public void setBlockToIdealForm() {
+		removeBlockFromBackground();
+		int[][] data = toBinaryMatrix();
+		int indx = 0;
+		double[][] dataForms = new double[BloqueTetris.formas.length*4][3];
+
+		for(int i = 0; i < BloqueTetris.formas.length; i++) {
+			BloqueTetris b = new BloqueTetris(BloqueTetris.formas[i], null, BloqueTetris.colores[i], i);
+			for(int j = 0; j < b.getRotaciones().length; j++) {
+				double[] aux = {i, j, puntuacion(data, b.getRotation(j))};
+				dataForms[indx] = aux;
+				indx++;
+			}
+		}
+		calculateBestRotacion(dataForms);
+		while(moveBlockDown()) continue; //isBajable en BloqueTetris
+		moveBlockToBackground();
+	}
+
+	private void calculateBestRotacion(double[][] dataForms) {
+		int form = 0,rot = 0;
+		double max = 0;
+		for (double[] dataForm : dataForms) {
+			if (dataForm[2] > max) {
+				max = dataForm[2];
+				form = (int) dataForm[0];
+				rot = (int) dataForm[1];
+			}
+		}
+		block.changeForm(form, rot);
+	}
+
+	private double puntuacion(int[][] data, int[][] rot) {
+		int pos = 0;
+		double[] puntuaciones = new double[100];
+		for(int fil = rot.length-1; fil > 0;fil--) {
+			for(int fil2 = data.length-1; fil2 >= 0; fil2--) {
+				if(data[fil2] != null) {
+					for(int X = 0; X <= data[fil2].length - rot[fil].length; X++)
+						if(isValid(rot[fil], Arrays.copyOfRange(data[fil2],X,X+rot[fil].length))) {
+							puntuaciones[pos] = calcularPuntuacion(rot, data, X, fil2);
+							pos++;
+						}
+				}
+			}
+
+		}
+		DoubleSummaryStatistics stat = Arrays.stream(puntuaciones).summaryStatistics();
+		return stat.getMax();
+	}
+
+	/*
+	 * Retorna si los arreglos son validos
+	 */
+	private boolean isValid(int[] arr, int[] arr2) {
+		for(int i = 0; i < arr.length; i++) if((arr[i] == 0 || arr2[i] == 0) && arr[i] != arr2[i]) return false;
+		return true;
+	}
+
+	/*
+	 * Calcula Una puntuacion que determinara que tan buena es la rotacion
+	 */
+	private int calcularPuntuacion(int[][] rot, int[][] data, int col, int fil) {//================ ARREGLAR==============================
+		//Retornar un porcentaje de parecido, la que tenga un mayor porcentaje de parecido es la indicada
+		int puntuacion = 0;
+		for(int i = rot.length-1; i >= 0; i--) {
+			if(fil >= 0 && col+rot[i].length <= rot[i].length)
+			{
+				puntuacion += areEquals(rot[i], Arrays.copyOfRange(data[fil], col, col+rot[i].length), fil+1);
+			}
+			fil--;
+		}
+		return puntuacion;
+	}
+
+	private int areEquals(int[] arr, int[] arr2, int suma) {
+		int cont = 0;
+		for(int i = 0; i < arr.length; i++) if(arr[i] == arr2[i] && arr[i] == 1) cont += suma;
+		return cont;
+	}
+
+
+
 
 	@Override
 	public String toString() {

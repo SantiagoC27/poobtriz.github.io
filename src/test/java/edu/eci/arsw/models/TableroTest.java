@@ -1,18 +1,19 @@
 package edu.eci.arsw.models;
 
 import edu.eci.arsw.models.buffos.Buffo;
-import edu.eci.arsw.models.buffos.BuffoS;
 import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.buffos.factories.BuffoFactory;
+import edu.eci.arsw.models.rebordes.RebordeClassic;
 import edu.eci.arsw.shared.TetrisException;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TableroTest {
 	Tablero t;
@@ -22,7 +23,7 @@ public class TableroTest {
 
 	CommonBuffo b = new CommonBuffo();
 
-	@Before
+	@BeforeEach
 	public void genTablero(){
 
 		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros);
@@ -115,6 +116,18 @@ public class TableroTest {
 			assertTrue(t.moveBlock("DOWN"));
 		}
 		assertTrue(t.moveBlock("DOWN"));
+	}
+
+	@Test
+	public void shouldEndGame() throws TetrisException {
+		List<BloqueTetris>bloques = new ArrayList<>();
+		t = new Tablero(true, 1000, "yellow", 5, 8, bloques, b, tableros);
+		t.background[0] = new String[]{"red", "red", "red", "red", "red", "red", "red", t.getBg()};
+		bloques.add(new BloqueTetris(BloqueTetris.formas[0], new RebordeClassic(),"blue", 0) );
+		Assertions.assertFalse(t.moveBlock("DOWN"));
+
+		Assertions.assertTrue(t.isFinGame());
+
 	}
 
 	@Test

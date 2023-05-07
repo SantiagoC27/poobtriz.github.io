@@ -34,7 +34,7 @@ public class BuffoFactory {
                     b = new BuffoX(c);
                     break;
                 default:
-                    b = new BuffoS(c);
+                    b = new BuffoSlow(c);
                     break;
             }
             if (colors.contains(b.getColor())) b = getRandomBuffo(c, colors);

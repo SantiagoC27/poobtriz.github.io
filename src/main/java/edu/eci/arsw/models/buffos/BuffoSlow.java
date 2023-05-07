@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 
 import edu.eci.arsw.models.Tablero;
 
-public class BuffoS extends Buffo{
+public class BuffoSlow extends Buffo{
 
-	public BuffoS(int[] c) {
+	public BuffoSlow(int[] c) {
 		super(c);
 		super.color = "green";
 	}

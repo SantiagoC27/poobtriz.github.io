@@ -24,10 +24,10 @@ public class BloqueTetris implements Cloneable, Serializable {
 	private final int currentForm;
 	
 	
-	public BloqueTetris(int[][] shape, Reborde r, String c, int cu) {
+	public BloqueTetris(int[][] shape, Reborde r, String color, int cu) {
 		this.reborde = r;
 		this.shape = shape;
-		this.color = c;
+		this.color = color;
 		this.currentForm = cu;
 		crearRotaciones();
 	}
@@ -79,9 +79,11 @@ public class BloqueTetris implements Cloneable, Serializable {
 		return rotaciones[pos];
 	}
 	
-	public void changeForm(int index) {
+	public void changeForm(int index, int rotacion) {
 		shape = formas[index];
 		crearRotaciones();
+		currentRotation = rotacion;
+		setShape();
 	}
 
 	 /**
@@ -160,31 +162,39 @@ public class BloqueTetris implements Cloneable, Serializable {
 	}
 
 	 /**
-	 * Retorna las coordenadas mas cercanas a la ficha o aun bloque de distancia
+	 * Retorna las coordenadas laterales a la ficha
 	 * @return Arreglo de corrednadas cercanas
 	 */
-	public int[][] getCoordenadasCercanas() {
-		int[][] posiciones = new int[16][2];
-		int cont = 0;
-		for(int[] c :this.getCoordenadas()) {
-			posiciones[cont] = new int[]{c[0]-1, c[1]};
-			posiciones[cont+1] = new int[]{c[0]+1, c[1]};
-			posiciones[cont+2] = new int[]{c[0], c[1]+1};
-			posiciones[cont+3] = new int[]{c[0], c[1]-1};
-			posiciones[cont+4] = new int[]{c[0], c[1]};
-			cont += 4;
-			cont++;
-		}
-		return posiciones;
-	}
+	 public List<int[]> getCoordenadasCercanas() {
+		 List<int[]> posiciones = new ArrayList<>();
+		 for(int[] c :this.getCoordenadas()) {
+			 if (HasNotCoord(c[0] - 1, c[1], posiciones))  posiciones.add(new int[]{c[0]-1, c[1]});
+			 if (HasNotCoord(c[0] + 1, c[1], posiciones ))  posiciones.add(new int[]{c[0]+1, c[1]});
+			 if (HasNotCoord(c[0], c[1]+1, posiciones))  posiciones.add(new int[]{c[0], c[1]+1 });
+			 if (HasNotCoord(c[0], c[1] - 1, posiciones))  posiciones.add(new int[]{c[0], c[1]-1});
+			 if (HasNotCoord(c[0] + 1, c[1] + 1, posiciones))  posiciones.add(new int[]{c[0] + 1, c[1]+1});
+			 if (HasNotCoord(c[0] - 1, c[1] - 1, posiciones))  posiciones.add(new int[]{c[0]-1, c[1]-1});
+			 if (HasNotCoord(c[0] + 1, c[1] - 1, posiciones))  posiciones.add(new int[]{c[0]+1, c[1]-1});
+			 if (HasNotCoord(c[0] - 1, c[1] + 1, posiciones))  posiciones.add(new int[]{c[0]-1, c[1]+1});
+		 }
+		 return posiciones;
+	 }
+
+	/**
+	 * Verifica que la coordenada x e y no esté en la lista indicada, y tampoco sea parte de las coordenadas del bloque
+	 */
+	 private boolean HasNotCoord(int x, int y, List<int[]> positions){
+		 return Arrays.stream(getCoordenadas()).noneMatch(c -> c[0] == x && c[1] == y) &&
+				 positions.stream().noneMatch(co -> co[0] == x && co[1] == y);
+	 }
 
 	/**
 	 * Genera un bloque de tetris aleatorio en forma color y reborde
 	 */
-	public static BloqueTetris selectRandomBlock(String bg) {
+	public static BloqueTetris selectRandomBlock(String bg, Reborde r) {
 		int n = new Random().nextInt(formas.length);
-		if (Objects.equals(colores[n], bg)) return selectRandomBlock(bg);
-		Reborde r = Reborde.randomReborde();
+		if (Objects.equals(colores[n], bg)) return selectRandomBlock(bg, r);
+		if (r == null)  r = Reborde.randomReborde();
 		return new BloqueTetris(formas[n],r, colores[n], n);
 	}
 	
@@ -192,13 +202,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 		if(currentRotation > 3) currentRotation = 0;
 		shape = rotaciones[currentRotation];
 		currentRotation++;
-	}
-	
-	public void setShape(int pos) {
-		if(pos < 4) {
-			shape = rotaciones[pos];	
-			currentRotation = pos+1;			
-		}		
 	}
 
 
@@ -211,7 +214,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 	}
 
 	/**
-	 *
 	 * @return La posición en X de la pieza desde su posición superior izquierda
 	 */
 	public int 	getWidth() {
@@ -227,7 +229,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public void setMovilidad(boolean p) {
 		this.isMovible = p;
 	}
-
 
 
 	public int countCuadrosFila(int pos) {
@@ -251,146 +252,5 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public int[][][] getRotaciones() {
 		return this.rotaciones;
 	}
-	
-	
-	public void findIdealForm(int[][] data, Tablero t, String col) {
-		int indx = 0;
-		double[][] dataForms = new double[formas.length*4][3];
-		
-		for(int i = 0; i < formas.length; i++) {	
-			BloqueTetris b = new BloqueTetris(formas[i], null, colores[i], i);
-			for(int j = 0; j < b.getRotaciones().length; j++) {
-				double[] aux = {i, j, puntuacion(data, b.getRotation(j))}; 
-				dataForms[indx] = aux;
-				indx++;
-			}
-		}
-		calculateBestRotacion(dataForms);
-		while(isBajable(t, col)) moveDown();
-		
-		
-		
-	}
-
-	private boolean isBajable(Tablero t, String col) {//get downest squares, por cada coord de ellos, si hay algo all�
-		for(int[] co :this.getDownsetSquares(t)) {
-			try {
-				//Si abajo esta vacio, mover abajo
-				if(!Objects.equals(t.getBackground()[co[1] + 1][co[0]], col)) return false;
-			}catch(Exception e) {
-				return false;
-				}
-		}
-		return true;
-	}
-
-	private int[][] getDownsetSquares(Tablero t) {
-		int[][] coords = new int[getWidth()][2];
-		int pos = 0;
-		for(int c = 0; c < getWidth(); c++) {
-			for(int r = getHeight()-1; r >= 0 ; r--) {
-				if(shape[r][c] == 1 && r+ y < t.background.length && x + c< t.background[0].length) {
-					int[] aux = {c+x,r+y};
-					coords[pos] =  aux;
-					pos++;
-					break;				
-				}
-			}
-		}
-		return coords;
-	}
-
-
-
-	private void calculateBestRotacion(double[][] dataForms) {
-		int form = 0,rot = 0;
-		double max = 0;
-		for(int i = 0; i < dataForms.length; i++) {
-			if(dataForms[i][2] > max) {
-				max =  dataForms[i][2];
-				form = (int) dataForms[i][0];
-				rot =  (int) dataForms[i][1];
-			}
-		}
-		this.changeForm(form);
-		this.setShape(rot);
-		
-	}
-
-
-
-	private double puntuacion(int[][] data, int[][] rot) {
-			int pos = 0;
-			double[] puntuaciones = new double[100]; 
-			for(int fil = rot.length-1; fil > 0;fil--) {
-				for(int fil2 = data.length-1; fil2 >= 0; fil2--) {
-					if(data[fil2] != null) {
-						for(int X = 0; X <= data[fil2].length - rot[fil].length; X++)
-							if(isValid(rot[fil], Arrays.copyOfRange(data[fil2],X,X+rot[fil].length))) {
-								puntuaciones[pos] = calcularPuntuacion(rot, data, X, fil2);
-								pos++;
-							}	
-					}					}
-
-			}
-			DoubleSummaryStatistics stat = Arrays.stream(puntuaciones).summaryStatistics();
-		return stat.getMax();
-	}
-
-
-
-	private int areEquals(int[] arr, int[] arr2, int suma) {
-		int cont = 0; 
-		for(int i = 0; i < arr.length; i++) if(arr[i] == arr2[i] && arr[i] == 1) cont += suma;
-		return cont;
-	}
-
-	/*
-	 * Retorna si los arreglos son validos
-	 */
-	private boolean isValid(int[] arr, int[] arr2) {
-		for(int i = 0; i < arr.length; i++) if((arr[i] == 0 || arr2[i] == 0) && arr[i] != arr2[i]) return false;
-		return true;
-	}
-
-
-
-	/*
-	 * Calcula Una puntuacion que determinara que tan buena es la rotacion
-	 */
-	private int calcularPuntuacion(int[][] rot, int[][] data, int col, int fil) {//================ ARREGLAR==============================
-		//Retornar un porcentaje de parecido, la que tenga un mayor porcentaje de parecido es la indicada
-		int puntuacion = 0;
-		for(int i = rot.length-1; i >= 0; i--) {
-			if(fil >= 0 && col+rot[i].length <= rot[i].length)
-			{
-				puntuacion += areEquals(rot[i], Arrays.copyOfRange(data[fil], col, col+rot[i].length), fil+1); 
-			}
-			fil--;
-		}
-		return puntuacion;
-	}
-
-	/*
-	 * Traduce una matriz de colores a una matriz de ceros y unos
-	 * 1 si ahi puede caber una ficha, 0 si no.
-	 */
-
-	public int[][] traducir(Tablero t, String col) {
-		int[][] rta = new int[5][];
-		int cont = 0;
-		for(int i = y; i < t.background.length && i < y + 4; i++) {
-			int[] aux = new int[t.background[0].length-x];
-			for(int j =x; j < t.background[0].length && j <x + 4; j++) {
-				if(Objects.equals(t.getBackground()[i][j], col)) aux[j-x] = 1;  else aux[j-x] = 0;
-			}
-			rta[cont] = aux;
-			cont++;
-		}
-		return rta;
-	}
-	
-	
-	
 }
 

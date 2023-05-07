@@ -1,8 +1,12 @@
 package edu.eci.arsw.models.rebordes;
 
-public class RebordeR extends Reborde {
-	//bomb
-	public RebordeR() {
+
+/**
+ * Cuando el bloque se fije se autodestruirá y destruirán los bloques que este toque
+ */
+public class RebordeBomb extends Reborde {
+
+	public RebordeBomb() {
 		super("red");
 	}
 	
