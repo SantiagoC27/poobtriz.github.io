@@ -1,7 +1,6 @@
 package edu.eci.arsw.websockets;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,8 +13,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import com.google.gson.Gson;
-
 import edu.eci.arsw.models.Lobby;
 import edu.eci.arsw.services.LobbyService;
 import edu.eci.arsw.services.SessionService;
@@ -24,7 +21,6 @@ import edu.eci.arsw.shared.TetrisException;
 @ServerEndpoint(value ="/lobby/{username}/{codigo}")
 @ApplicationScoped
 public class LobbySocket {
-    private static final Gson gson = new Gson();
 
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
@@ -45,14 +41,7 @@ public class LobbySocket {
 
     @OnClose
     public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) throws IOException, TetrisException {
-
-        Map<String, Session> lobbySessions = SessionService.getSessions(lobbyService.get(codigo), sessions, false);
-        for (String user:  lobbySessions.keySet()) {
-            lobbySessions.get(user).close();
-            sessions.remove(user);
-        }
-        sessions.remove(username);
-
+        SessionService.closeSessions(lobbyService.get(codigo), sessions);
     }
 
     @OnError

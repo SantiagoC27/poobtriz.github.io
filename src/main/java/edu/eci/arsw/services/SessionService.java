@@ -1,5 +1,6 @@
 package edu.eci.arsw.services;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,5 +28,13 @@ public class SessionService {
             else if (throwing) throw new TetrisException(TetrisException.INVALID_SESSION);
         }
         return session;
+    }
+
+    public static void closeSessions(Lobby lobby, Map<String, Session> sessions) throws TetrisException, IOException {
+        Map<String, Session> lobbySessions = SessionService.getSessions(lobby, sessions, false);
+        for (String user:  lobbySessions.keySet()) {
+            lobbySessions.get(user).close();
+            sessions.remove(user);
+        }
     }
 }
