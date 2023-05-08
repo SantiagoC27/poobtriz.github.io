@@ -45,13 +45,10 @@ public class Player implements Serializable {
 
 	public void moveBlock(String movement){
 		try{
-			synchronized (tablero){
-				tablero.moveBlock(movement.toUpperCase());
-			}
+			tablero.moveBlock(movement.toUpperCase());
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-
 	}
 
 	public boolean hasFinished() {
@@ -59,6 +56,10 @@ public class Player implements Serializable {
 		if (tablero != null)
 			finished = tablero.hasFinished();
 		return finished;
+	}
+
+	public int getVelocity(){
+		return tablero.getVelocidad();
 	}
 
 	@Override

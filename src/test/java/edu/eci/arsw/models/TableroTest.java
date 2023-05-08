@@ -25,7 +25,6 @@ public class TableroTest {
 
 	@BeforeEach
 	public void genTablero(){
-
 		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros);
 		tableros.add(t);
 		t.spawnBlock();
@@ -88,7 +87,7 @@ public class TableroTest {
 		t.background[filas-3][cols-1] = t.getBg();
 		t.background[filas-1][cols/2] = t.getBg();
 		t.calculatePuntuacion();
-		assertEquals(20,t.getPuntuacion().get());
+		assertEquals(20,t.getPuntuacion());
 
 		//System.out.println(Arrays.deepToString(t.background).replaceAll("],", "],\n"));
 		for (int i = 1; i < expected.length; i++) {
@@ -102,6 +101,8 @@ public class TableroTest {
 	public void testRotarBlock() {
 		// TODO Terminar
 	}
+
+	@Test
 	public void colisionTest(){
 		//TODO realizar test
 	}
@@ -133,7 +134,7 @@ public class TableroTest {
 	@Test
 	public void shouldActivateBuffo() throws TetrisException {
 		int[] position = new int[]{5,2};
-		Buffo b = BuffoFactory.getRandomBuffo(position, new ArrayList<>());
+		Buffo b = BuffoFactory.getRandomBuffo(position);
 		t.setBuffo(b);
 		for (int i = 0; i < position[1]; i++) {
 			t.moveBlock("DOWN");
@@ -141,5 +142,19 @@ public class TableroTest {
 		}
 		t.moveBlock("DOWN");
 		assertNull(t.getBuffo());
+	}
+
+	@Test
+	public void shouldntMove() throws TetrisException {
+		List<int[]> oldPos = new ArrayList<>();
+		for (Tablero t :  tableros) {
+			oldPos.add(t.getPositionBlock());
+		}
+
+		for (int i = 0; i < tableros.size(); i++) {
+			tableros.get(i).setMovilidadBlock(false);
+			tableros.get(i).moveBlock("DOWN");
+			assertEquals(tableros.get(i).getPositionBlock()[1], oldPos.get(i)[1]);
+		}
 	}
 }

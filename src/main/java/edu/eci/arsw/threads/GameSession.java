@@ -34,12 +34,11 @@ public class GameSession extends Thread{
     public void run(){
         this.gt.start();
         try {
-            while (gt.isAlive()){
-                    synchronized (playersMoved){
-                        if (!playersMoved.get()) playersMoved.wait();
-                        playersMoved.set(false);
-                        broadcast();
-                    }
+            while (!gt.getPlayerMoved().get()){
+                synchronized (playersMoved){
+                    playersMoved.wait();
+                    broadcast();
+                }
             }
             System.out.println("Session finished");
             SessionService.closeSessions(lobby, sessions);
