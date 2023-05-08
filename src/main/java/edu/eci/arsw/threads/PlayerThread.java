@@ -20,6 +20,7 @@ public class PlayerThread extends Thread{
 
     public synchronized void moveBlock(String movement) throws TetrisException {
         synchronized (endGame){
+            player.getTablero().setMovilidadBlock(true);
             this.player.moveBlock(movement);
             this.endGame.notify();
         }

@@ -13,7 +13,6 @@ public class CommonBuffo {
     }
 
     public void set(Buffo buffo){
-        System.out.println(buffo);
         this.buffo = buffo;
     }
 

@@ -12,7 +12,7 @@ import lombok.Setter;
 public class BuffoSlow extends Buffo{
 
 	@Setter
-	private int delay = 3000;
+	private int delay = 10000;
 
 	final Timer timer;
 

@@ -11,13 +11,13 @@ import lombok.Setter;
 
 
 @Getter
-public class Buffox2 extends Buffo{
+public class BuffoFaster extends Buffo{
 
 	@Setter
-	private int delay =5000;
+	private int delay =10000;
 
 	private final Timer timer;
-	public Buffox2(int[] c) {
+	public BuffoFaster(int[] c) {
 		super(c, "x2");
 		timer = new Timer();
 	}

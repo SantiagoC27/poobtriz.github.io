@@ -1,6 +1,6 @@
 package edu.eci.arsw.models.buffos.factories;
 
-import edu.eci.arsw.models.buffos.Buffo;
+import edu.eci.arsw.models.buffos.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,10 @@ public class BuffoFactory {
         }
 
         return b;
+    }
+
+    public static Buffo getRandomBuffo() {
+        return new BuffoFaster(new int[]{2,3});
     }
 
     private static List<Class<? extends Buffo>> findBuffoSubclasses() {

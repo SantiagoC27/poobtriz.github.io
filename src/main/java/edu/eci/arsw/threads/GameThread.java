@@ -99,7 +99,7 @@ public class GameThread extends Thread{
                 int[] c = {3,2};
                 //int[] c = this.getCoord();
                 //if (this.isEmptyCoord(c) || iteraciones >= 10) 
-                b.set(BuffoFactory.getRandomBuffo(c));
+                b.set(BuffoFactory.getRandomBuffo());
             }
 
             private int[] getCoord(){
