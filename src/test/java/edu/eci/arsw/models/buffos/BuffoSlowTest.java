@@ -10,14 +10,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BuffoLessScoreTest{
+class BuffoSlowTest  {
     int filas = 5;
     int cols = 10;
     List<Tablero> tableros = new ArrayList<>();
 
     final CommonBuffo b = new CommonBuffo();
 
-    BuffoLessScore buff;
+    BuffoSlow buff;
 
     @BeforeEach
     public void genTablero(){
@@ -25,30 +25,26 @@ public class BuffoLessScoreTest{
         tableros.add(new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros));
         tableros.add(new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros));
         for (Tablero t : tableros) {
-                t.spawnBlock();
+            t.spawnBlock();
         }
-        buff =new BuffoLessScore(new int[]{cols/2, 0});
+        buff =new BuffoSlow(new int[]{cols/2, 0});
         buff.setDelay(1000);
         b.set(buff);
     }
 
     @Test
     public void shouldActivate() throws TetrisException, InterruptedException {
-        tableros.get(0).moveBlock("DOWN");
+        int iTablero =(int) (Math.random() * tableros.size());
+        tableros.get(iTablero).moveBlock("DOWN");
         assertNull(b.get());
-        for (int i = 2; i < tableros.size(); i++) {
-            assertEquals(tableros.get(i).getSumPuntuacion().get(), tableros.get(i - 1).getSumPuntuacion().get());
-        }
-        assertNotEquals(tableros.get(0).getSumPuntuacion().get(), tableros.get(1).getSumPuntuacion().get());
-        Thread.sleep(buff.getDelay()+10);
-
-        for (int i = 1; i < tableros.size(); i++) {
-            assertEquals(tableros.get(i).getSumPuntuacion().get(), tableros.get(i - 1).getSumPuntuacion().get());
+        for (Tablero t : tableros) {
+            if (iTablero != t.getId()) assertNotEquals(t.getVelocidad(), tableros.get(iTablero).getVelocidad());
         }
 
-
-
-
+        synchronized (buff.getTimer()){
+            buff.getTimer().wait();
+            for (Tablero t : tableros) assertEquals(tableros.get(iTablero).getVelocidad(), t.getVelocidad());
+        }
 
     }
 }

@@ -1,6 +1,5 @@
 package edu.eci.arsw.models.buffos;
 
-import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.shared.TetrisException;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +41,7 @@ class BuffoStopDieceTest {
         int iTablero =(int) (Math.random() * tableros.size());
         tableros.get(iTablero).moveBlock("DOWN");
         oldPos.set(iTablero, tableros.get(iTablero).getPositionBlock());
-
+        assertNull(b.get());
         for (Tablero t :  tableros) t.moveBlock("DOWN");
 
         for (int i = 0; i < tableros.size(); i++) {

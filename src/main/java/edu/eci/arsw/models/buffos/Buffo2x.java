@@ -6,29 +6,36 @@ import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import edu.eci.arsw.models.Tablero;
+import lombok.Getter;
+import lombok.Setter;
 
-public class BuffoST extends Buffo{
-	public BuffoST(int[] c) {
-		super(c, "yellow");
 
+@Getter
+public class Buffo2x extends Buffo{
+
+	@Setter
+	private int delay =5000;
+
+	private final Timer timer;
+	public Buffo2x(int[] c) {
+		super(c, "purple");
+		timer = new Timer();
 	}
-
 	@Override
 	public void activate(List<Tablero> tableros, int idTablero) {
-		//Hace que el bloque no baje autom�ticamente por 3 segundos
 		Tablero t = tableros.stream().filter(s -> s.getId() == idTablero).collect(Collectors.toList()).get(0);
-		final Timer timer = new Timer();
-		final int beforeVel = t.getVelocidad();
-		t.setVelocidad(3000);
+
+		t.setVelocidad(t.getVelocidad()/2);
+		
 		TimerTask genBuffo = new TimerTask() {
 			public void run() {
-				t.setVelocidad(beforeVel);
-				this.cancel();
-				timer.cancel();
-
+				t.setVelocidad(t.getVelocidad()*2);
+				synchronized (timer){
+					timer.notify();
+				}
 			}
 		};
-		timer.schedule(genBuffo,0);
-
+		timer.schedule(genBuffo, delay);
+		
 	}
 }

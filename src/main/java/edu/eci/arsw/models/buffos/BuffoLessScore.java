@@ -24,7 +24,6 @@ public class BuffoLessScore extends Buffo{
     int puntuacion = tableros.stream().filter(s -> s.getId() == idTablero).collect(Collectors.toList()).get(0).getSumPuntuacion().get();
     for (Tablero t: othersTableros) {
         t.getSumPuntuacion().set(puntuacion/2);
-        System.out.println("tablero " +t.getId() + "seteao");
     }
 
     final Timer timer = new Timer();
@@ -33,12 +32,13 @@ public class BuffoLessScore extends Buffo{
             for (Tablero t: othersTableros) {
                 t.getSumPuntuacion().set(puntuacion);
             }
-            System.out.println("tableros normalizados");
-            this.cancel();
-            timer.cancel();
+
+            synchronized (timer){
+                timer.notify();
+            }
         }
     };
-    timer.schedule(resetAddPuntuacion,delay,1);
+    timer.schedule(resetAddPuntuacion,delay);
 
 
     }
