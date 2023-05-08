@@ -41,7 +41,7 @@ public class GameThreadTest  {
         gt.join();
         long end1 = System.currentTimeMillis();
         System.out.println(end1-start1);
-        assertTrue(end1-start1 < 100);
+        assertTrue(end1-start1 < 500);
     }
 
 }

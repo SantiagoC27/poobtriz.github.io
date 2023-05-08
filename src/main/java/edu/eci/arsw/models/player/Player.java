@@ -46,6 +46,7 @@ public class Player implements Serializable {
 	public void moveBlock(String movement){
 		try{
 			synchronized (tablero){
+				tablero.setMovilidadBlock(true);
 				tablero.moveBlock(movement.toUpperCase());
 			}
 		}catch (Exception e){

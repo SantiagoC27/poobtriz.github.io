@@ -2,7 +2,6 @@ package edu.eci.arsw.models;
 
 import java.io.Serializable;
 import java.util.*;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.eci.arsw.models.buffos.Buffo;
@@ -10,6 +9,7 @@ import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.TetrisException;
 import lombok.Getter;
+import lombok.Setter;
 
 
 @Getter
@@ -20,6 +20,8 @@ public class Tablero implements Serializable{
 	private final List<Tablero> tableros;
 	private final List<BloqueTetris> bloques;
 
+	private final AtomicInteger sumPuntuacion = new AtomicInteger(10);
+
 	public String[][] background;
 	public Reborde[][] bgReborde;
 	private int bloquesUsados = 0;
@@ -29,7 +31,7 @@ public class Tablero implements Serializable{
 	private static boolean uniforme = true;
 
 	private final String bg;
-	private final AtomicInteger puntuacion = new AtomicInteger(0);
+	private int puntuacion = 0;
 
 	private boolean finGame = false;
 	public Tablero(boolean uniforme, int vel, String bg, int filas, int cols, List<BloqueTetris> bloques,
@@ -148,16 +150,18 @@ public class Tablero implements Serializable{
 	 */
 	public boolean Colision(int y, int x, BloqueTetris b) {
 		int[][] coords = b.getCoordenadas();
+		boolean colision = false;
 		for(int[] c : coords) {
-
 			if (c[1] + y < 0) continue;
 			// Cuando las siguientes casillas son de otro color, y ese otro color no hace parte del bloque
 			if(c[1] + y >= background.length ||
 					(!Objects.equals(background[c[1] + y][c[0] + x], bg) &&
-					Arrays.stream(coords).noneMatch(co -> co[0] == c[0] + x && co[1] == c[1] + y)))
-				return true;
+					Arrays.stream(coords).noneMatch(co -> co[0] == c[0] + x && co[1] == c[1] + y))) {
+				colision = true;
+				break;
+			}
 		}
-		return false;
+		return colision;
 	}
 	
 	/**
@@ -264,7 +268,7 @@ public class Tablero implements Serializable{
 	 * Limpia las lineas del tablero, y en base a esto agrega una puntuación.
 	 */
 	public void calculatePuntuacion(){
-		this.addPuntuacion(this.clearLines());
+		puntuacion += this.clearLines()*sumPuntuacion.get();
 	}
 
 	/** 
@@ -379,10 +383,6 @@ public class Tablero implements Serializable{
 			}
 		}							
 	}
-	
-	private void addPuntuacion(int linesCleared) {
-		puntuacion.set(puntuacion.get() + (linesCleared*10));
-	}
 
 
 	 /**
@@ -429,15 +429,13 @@ public class Tablero implements Serializable{
 	public void setMovilidadBlock(boolean p) {
 		if(block != null) block.setMovilidad(p);
 	}
-	
-	public int getPuntuacionBloques() {
-		return puntuacion.get();
-	}
+
 
 	public int[] getPositionBlock(){
 		int[] position = null;
 		if (block != null)
 			position = new int[]{block.getX(), block.getY()};
+		if (position == null) System.out.println("por esto");
 		return position;
 	}
 
@@ -502,7 +500,7 @@ public class Tablero implements Serializable{
 			}
 		}
 		calculateBestRotacion(dataForms);
-		while(moveBlockDown()) continue; //isBajable en BloqueTetris
+		while(moveBlockDown()) continue;
 		moveBlockToBackground();
 	}
 
@@ -590,7 +588,7 @@ public class Tablero implements Serializable{
 		}
 		sRta.append("]");
 		if (buffo.get() != null) sRta.append(", \"buffo\": ").append(buffo.get().toString());
-		sRta.append(String.format(",\"puntuacion\": %d", puntuacion.get()));
+		sRta.append(String.format(",\"puntuacion\": %d", puntuacion));
 		sRta.append("}");
 		return sRta.toString();
 

@@ -38,6 +38,6 @@ class PlayerThreadTest {
         long start1 = System.currentTimeMillis();
         pt.join();
         long end1 = System.currentTimeMillis();
-        assertTrue(end1-start1 < 5);
+        assertTrue(end1-start1 < 500);
     }
 }

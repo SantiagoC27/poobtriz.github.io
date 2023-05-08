@@ -9,8 +9,7 @@ import edu.eci.arsw.models.Tablero;
 
 public class BuffoST extends Buffo{
 	public BuffoST(int[] c) {
-		super(c);
-		super.color = "yellow";
+		super(c, "yellow");
 
 	}
 

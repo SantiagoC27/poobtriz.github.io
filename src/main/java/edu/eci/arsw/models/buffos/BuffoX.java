@@ -9,8 +9,7 @@ import edu.eci.arsw.models.Tablero;
 
 public class BuffoX extends Buffo{
 	public BuffoX(int[] c) {
-		super(c);
-		super.color = "purple";
+		super(c, "purple");
 	}
 	@Override
 	public void activate(List<Tablero> tableros, int idTablero) {

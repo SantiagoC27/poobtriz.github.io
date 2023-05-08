@@ -44,7 +44,7 @@ public class RebordeUselessTest {
             t.background[5] = new String[]{"red", "red", "red", "red", "red", "red", "red", "red", "red", "red"};
             t.bgReborde[5] = rebordes[i];
             t.calculatePuntuacion();
-            assertEquals(10 * i, t.getPuntuacionBloques());
+            assertEquals(10 * i, t.getPuntuacion());
             assertArrayEquals(t.background[5], expectedColors[i]);
             assertArrayEquals(t.bgReborde[5], rebordes[i]);
         }

@@ -10,8 +10,7 @@ import edu.eci.arsw.models.Tablero;
 public class BuffoSlow extends Buffo{
 
 	public BuffoSlow(int[] c) {
-		super(c);
-		super.color = "green";
+		super(c, "green");
 	}
 	
 	@Override
@@ -23,7 +22,7 @@ public class BuffoSlow extends Buffo{
 		
 		TimerTask genBuffo = new TimerTask() {
 			public void run() {
-					t.setVelocidad((int) t.getVelocidad()/2);
+					t.setVelocidad(t.getVelocidad()/2);
 					this.cancel();
 					timer.cancel();
 			}

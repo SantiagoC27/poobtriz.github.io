@@ -8,13 +8,14 @@ import lombok.Getter;
 
 @Getter
 public abstract class Buffo implements Serializable{
-	protected String color;
+	protected final String color;
 	private final int x;
 	private final int y;
 
-	public Buffo(int[] c) {
+	public Buffo(int[] c, String color) {
 		x = c[0];
 		y = c[1];
+		this.color = color;
 	}
 
 	 /**

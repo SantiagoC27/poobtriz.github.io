@@ -49,12 +49,12 @@ Un buffo es un atributo del juego que le aparecerá a varios jugadores. Estos ap
 
 Para simplificar, se considera invocador aquel que activa un buffo
 
-| Buffo          | Descripción                                                  |
-| -------------- | ------------------------------------------------------------ |
-| SlowScore| La puntuación que consigan los jugadores se verá disminuida en un 50% por 10 segundos a excepción del invocador. |
-| StopDiece      | Se detienen los bloques de los jugadores a excepción del invocador, hasta que se presione la tecla de bajar. |
-| Slow           | Los jugadores caerán el doble de lento a excepción del invocador |
-| 2x             | El jugador que lo coja bajará el doble de rápido.            |
+| Buffo     | Descripción                                                                                                      |
+|-----------|------------------------------------------------------------------------------------------------------------------|
+| LessScore | La puntuación que consigan los jugadores se verá disminuida en un 50% por 10 segundos a excepción del invocador. |
+| StopDiece | Se detienen los bloques de los jugadores a excepción del invocador, hasta que se presione la tecla de bajar.     |
+| Slow      | Los jugadores caerán el doble de lento a excepción del invocador por 5 segundos                                  |
+| 2x        | El jugador que lo coja bajará el doble de rápido.                                                                |
 
 
 
