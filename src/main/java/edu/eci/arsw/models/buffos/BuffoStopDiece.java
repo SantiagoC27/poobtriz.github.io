@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class BuffoStopDiece extends Buffo{
 	
 	public BuffoStopDiece(int[] c) {
-		super(c, "magenta");
+		super(c, "stopDiece");
 	}
 
 	@Override

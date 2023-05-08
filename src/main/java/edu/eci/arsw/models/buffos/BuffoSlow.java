@@ -17,7 +17,7 @@ public class BuffoSlow extends Buffo{
 	final Timer timer;
 
 	public BuffoSlow(int[] c) {
-		super(c, "green");
+		super(c, "slow");
 		timer= new Timer();
 	}
 	

@@ -11,7 +11,7 @@ public class BuffoFactory {
 
     private static final List<Class<? extends Buffo>> buffosSubclasses = findBuffoSubclasses();
 
-    public static Buffo getRandomBuffo(int[] c, List<String> colors) {
+    public static Buffo getRandomBuffo(int[] c) {
         Buffo b = null;
         if (buffosSubclasses.isEmpty()) throw new IllegalStateException("No se encontraron subclases de Buffo");
 
@@ -20,7 +20,6 @@ public class BuffoFactory {
 
         try {
             b = selectedBuffoClass.getDeclaredConstructor(int[].class).newInstance(c);
-            if (colors.contains(b.getColor())) b = getRandomBuffo(c, colors);
         } catch (Exception e) {
             e.printStackTrace();
         }

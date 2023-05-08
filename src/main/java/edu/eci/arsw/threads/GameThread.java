@@ -1,5 +1,14 @@
 package edu.eci.arsw.threads;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.Estado;
 import edu.eci.arsw.models.Lobby;
@@ -8,10 +17,6 @@ import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.buffos.factories.BuffoFactory;
 import edu.eci.arsw.models.player.Player;
 import lombok.Getter;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class GameThread extends Thread{
 
@@ -25,15 +30,12 @@ public class GameThread extends Thread{
     private final TimerTask genBuffo;
     private final Timer timer;
 
-    private final List<String> colorsTableros;
-
     private final CommonBuffo b = new CommonBuffo();
 
 
     public GameThread(Lobby lobby, AtomicBoolean playerMoved){
         this.lobby = lobby;
         this.playerMoved = playerMoved;
-        this.colorsTableros = lobby.getColorsTableros();
         timer = new Timer();
         genBuffo = instanceBuffosTask();
     }
@@ -94,8 +96,10 @@ public class GameThread extends Thread{
             }
 
             private void instanceBuffo(int iteraciones){
-                int[] c = this.getCoord();
-                if (this.isEmptyCoord(c) || iteraciones >= 10) b.set(BuffoFactory.getRandomBuffo(c, colorsTableros));
+                int[] c = {3,2};
+                //int[] c = this.getCoord();
+                //if (this.isEmptyCoord(c) || iteraciones >= 10) 
+                b.set(BuffoFactory.getRandomBuffo(c));
             }
 
             private int[] getCoord(){

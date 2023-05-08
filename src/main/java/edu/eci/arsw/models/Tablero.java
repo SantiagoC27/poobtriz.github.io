@@ -1,7 +1,12 @@
 package edu.eci.arsw.models;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.DoubleSummaryStatistics;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.eci.arsw.models.buffos.Buffo;
@@ -9,7 +14,6 @@ import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.rebordes.Reborde;
 import edu.eci.arsw.shared.TetrisException;
 import lombok.Getter;
-import lombok.Setter;
 
 
 @Getter
@@ -93,6 +97,7 @@ public class Tablero implements Serializable{
 						if(c == c2) {
 							coord[0] = c;
 							coord[1] = n;
+							break;
 						}
 					}
 				}				
@@ -435,7 +440,6 @@ public class Tablero implements Serializable{
 		int[] position = null;
 		if (block != null)
 			position = new int[]{block.getX(), block.getY()};
-		if (position == null) System.out.println("por esto");
 		return position;
 	}
 

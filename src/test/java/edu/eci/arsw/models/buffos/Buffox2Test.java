@@ -11,7 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class Buffo2xTest{
+public class Buffox2Test {
 
     int filas = 5;
     int cols = 10;
@@ -19,7 +19,7 @@ public class Buffo2xTest{
 
     final CommonBuffo b = new CommonBuffo();
 
-    Buffo2x buff;
+    Buffox2 buff;
 
     @BeforeEach
     public void genTablero(){
@@ -29,7 +29,7 @@ public class Buffo2xTest{
         for (Tablero t : tableros) {
             t.spawnBlock();
         }
-        buff =new Buffo2x(new int[]{cols/2, 0});
+        buff =new Buffox2(new int[]{cols/2, 0});
         buff.setDelay(1000);
         b.set(buff);
     }

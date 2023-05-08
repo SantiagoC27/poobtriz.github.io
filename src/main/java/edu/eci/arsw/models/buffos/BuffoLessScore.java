@@ -1,13 +1,13 @@
 package edu.eci.arsw.models.buffos;
 
-import edu.eci.arsw.models.Tablero;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
+
+import edu.eci.arsw.models.Tablero;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class BuffoLessScore extends Buffo{
@@ -15,7 +15,7 @@ public class BuffoLessScore extends Buffo{
     @Setter
     private int delay = 10000;
     public BuffoLessScore(int[] c){
-        super(c, "left,red,orange,yellow, green, blue,indigo,violet");
+        super(c, "lessScore");
     }
 
     @Override

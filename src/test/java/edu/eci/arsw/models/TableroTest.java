@@ -134,7 +134,7 @@ public class TableroTest {
 	@Test
 	public void shouldActivateBuffo() throws TetrisException {
 		int[] position = new int[]{5,2};
-		Buffo b = BuffoFactory.getRandomBuffo(position, new ArrayList<>());
+		Buffo b = BuffoFactory.getRandomBuffo(position);
 		t.setBuffo(b);
 		for (int i = 0; i < position[1]; i++) {
 			t.moveBlock("DOWN");
