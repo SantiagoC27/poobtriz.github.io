@@ -61,6 +61,10 @@ public class Player implements Serializable {
 		return finished;
 	}
 
+	public int getVelocity(){
+		return tablero.getVelocidad();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sRta = new StringBuilder();

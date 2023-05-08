@@ -7,7 +7,7 @@ import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.buffos.factories.BuffoFactory;
 import edu.eci.arsw.models.player.Player;
-import edu.eci.arsw.notifiers.PlayerNotifier;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 public class GameThread extends Thread{
 
     private final Lobby lobby;
-    private final AtomicBoolean playersMoved;
 
-    private final List<PlayerNotifier> players = new ArrayList<>();
+    @Getter
+    private final AtomicBoolean playerMoved;
+
+    private final List<PlayerThread> players = new ArrayList<>();
 
     private final TimerTask genBuffo;
     private final Timer timer;
@@ -28,9 +30,9 @@ public class GameThread extends Thread{
     private final CommonBuffo b = new CommonBuffo();
 
 
-    public GameThread(Lobby lobby, AtomicBoolean playersMoved){
+    public GameThread(Lobby lobby, AtomicBoolean playerMoved){
         this.lobby = lobby;
-        this.playersMoved = playersMoved;
+        this.playerMoved = playerMoved;
         this.colorsTableros = lobby.getColorsTableros();
         timer = new Timer();
         genBuffo = instanceBuffosTask();
@@ -40,41 +42,19 @@ public class GameThread extends Thread{
     @Override
     public void run(){
         instanceGame();
-        while(!lobby.endGame()){
-            for (PlayerNotifier player : players) {
-                try {
-                    synchronized (player.getMoved()){
-                        player.getMoved().set(false);
-                        player.moveBlock("DOWN");
-                        player.getMoved().set(true);
-                        player.getMoved().notify();
-                    }
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }
-            notifyPlayersMoved();
-
+        for (PlayerThread player : players) player.start();
+        for (PlayerThread player : players) {
             try {
-                Thread.sleep(lobby.getVelocity());
+                player.join();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
-        System.out.println("Acabo 1\n");
+
+        System.out.println("Acabo gameThread\n");
         genBuffo.cancel();
         timer.cancel();
         lobby.setEstado(Estado.FINISHED);
-        System.out.println("Acabo 2\n");
-        notifyPlayersMoved();
-    }
-
-
-    private void notifyPlayersMoved(){
-        synchronized (playersMoved){
-            playersMoved.set(true);
-            playersMoved.notify();
-        }
     }
 
     /**
@@ -90,14 +70,14 @@ public class GameThread extends Thread{
             tableros.add(new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
                     lobby.getFilas(), lobby.getCols(), bloques, b, tableros));
             player.setTablero(tableros.get(i));
-            players.add(new PlayerNotifier(player, new AtomicBoolean(false)));
+            players.add(new PlayerThread(player, playerMoved));
         }
         timer.schedule(genBuffo, 10000, 10000);
         lobby.setEstado(Estado.RUNNING);
     }
 
     public void moveBlock(String username, String movement) {
-        PlayerNotifier playerNot = players.stream().filter(p -> Objects.equals(p.getPlayer().getNick(), username))
+        PlayerThread playerNot = players.stream().filter(p -> Objects.equals(p.getPlayer().getNick(), username))
                 .collect(Collectors.toList()).get(0);
         try {
             GameModifyThread gmt = new GameModifyThread(playerNot, movement);
@@ -126,8 +106,8 @@ public class GameThread extends Thread{
                 boolean isEmpty = true;
                 int i = 0;
                 while (i < players.size()){
-                    PlayerNotifier p = players.get(i);
-                    synchronized (p.getMoved()){
+                    PlayerThread p = players.get(i);
+                    synchronized (p.getEndGame()){
                         if (p.isEmptyCoord(coord)) {
                             isEmpty = false;
                             break;

@@ -25,7 +25,6 @@ public class TableroTest {
 
 	@BeforeEach
 	public void genTablero(){
-
 		t = new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros);
 		tableros.add(t);
 		t.spawnBlock();
