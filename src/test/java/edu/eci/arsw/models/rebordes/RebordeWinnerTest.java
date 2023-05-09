@@ -19,8 +19,6 @@ public class RebordeWinnerTest{
     int filas = 20;
     int cols = 10;
 
-    int repeticiones = 4;
-
     List<BloqueTetris> bloques;
 
     CommonBuffo b = new CommonBuffo();
@@ -34,6 +32,7 @@ public class RebordeWinnerTest{
     @Test
     public void ShouldCompleteLine() throws TetrisException {
         for (int i = 0; i < BloqueTetris.formas.length; i++) {
+            bloques.add(new BloqueTetris(BloqueTetris.formas[i], new RebordeWinner(), "blue", 0));
             bloques.add(new BloqueTetris(BloqueTetris.formas[i], new RebordeWinner(), "blue", 0));
             t.background[filas-1] = new String[]{"red", "red", "red", "red", "red", t.getBg(),"red", "red", "red", "red"};
             //Preparar un terreno donde quepa una T

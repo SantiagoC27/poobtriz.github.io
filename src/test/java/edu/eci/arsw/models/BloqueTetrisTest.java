@@ -26,8 +26,61 @@ public class BloqueTetrisTest {
 
     @Test
     public void getCoordenadas() {
+        int[][] oldCoords;
         for (BloqueTetris bloque :  bloques) {
-            assertEquals(4, bloque.getCoordenadas().length);
+            oldCoords =bloque.getCoordenadas();
+            assertEquals(4, oldCoords.length);
+        }
+    }
+
+    @Test
+    public void shouldMoveLeft() {
+        int[][] oldCoords, newCoords;
+        for (BloqueTetris bloque :  bloques) {
+            oldCoords =bloque.getCoordenadas();
+            bloque.moveLeft();
+            newCoords =bloque.getCoordenadas();
+            for (int i = 0; i < oldCoords.length; i++) {
+                assertEquals(oldCoords[i][0], newCoords[i][0]+1);
+            }
+        }
+    }
+
+    @Test
+    public void shouldMoveRight() {
+        int[][] oldCoords, newCoords;
+        for (BloqueTetris bloque :  bloques) {
+            oldCoords =bloque.getCoordenadas();
+            bloque.moveRight();
+            newCoords =bloque.getCoordenadas();
+            for (int i = 0; i < oldCoords.length; i++) {
+                assertEquals(oldCoords[i][0], newCoords[i][0]-1);
+            }
+        }
+    }
+
+    @Test
+    public void shouldMoveDown() {
+        int[][] oldCoords, newCoords;
+        for (BloqueTetris bloque :  bloques) {
+            oldCoords =bloque.getCoordenadas();
+            bloque.moveDown();
+            newCoords =bloque.getCoordenadas();
+            for (int i = 0; i < oldCoords.length; i++) {
+                assertEquals(oldCoords[i][1], newCoords[i][1]-1);
+            }
+        }
+    }
+
+    @Test
+    public void shouldntMoveDown() {
+        int[][] oldCoords, newCoords;
+        for (BloqueTetris bloque :  bloques) {
+            oldCoords =bloque.getCoordenadas();
+            bloque.setMobibleDown(false);
+            bloque.moveDown();
+            newCoords =bloque.getCoordenadas();
+            assertArrayEquals(oldCoords, newCoords);
         }
     }
 

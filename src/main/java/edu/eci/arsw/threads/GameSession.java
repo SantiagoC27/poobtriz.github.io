@@ -34,7 +34,7 @@ public class GameSession extends Thread{
     public void run(){
         this.gt.start();
         try {
-            while (!gt.getPlayerMoved().get()){
+            while (gt.isAlive()){
                 synchronized (playersMoved){
                     playersMoved.wait();
                     broadcast();

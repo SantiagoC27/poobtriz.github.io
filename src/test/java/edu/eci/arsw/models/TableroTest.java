@@ -30,8 +30,18 @@ public class TableroTest {
 	}
 	
 	@Test
-	public void testSpawnBlock() {
+	public void testSpawnBlock() throws TetrisException {
 		assertNotNull(t.getBlock());
+		BloqueTetris nextPiece = t.getNextPiece().Clone();
+		assertNotNull(nextPiece);
+		while (t.moveBlock("DOWN")) {
+			assertNotNull(t.getBlock());
+			assertNotNull(nextPiece);
+		}
+		t.moveBlock("DOWN");
+		assertNotNull(t.getNextPiece());
+		assertNotNull(t.getBlock());
+		assertEquals(1, t.getBloquesUsados());
 	}
 
 	@Test
@@ -135,10 +145,9 @@ public class TableroTest {
 	public void shouldEndGame() throws TetrisException {
 		List<BloqueTetris>bloques = new ArrayList<>();
 		t = new Tablero(true, 1000, "yellow", 5, 8, bloques, b, tableros);
-		t.background[0] = new String[]{"red", "red", "red", "red", "red", "red", "red", t.getBg()};
 		bloques.add(new BloqueTetris(BloqueTetris.formas[0], new RebordeClassic(),"blue", 0) );
+		t.background[0] = new String[]{"red", "red", "red", "red", "red", "red", "red", t.getBg()};
 		Assertions.assertFalse(t.moveBlock("DOWN"));
-
 		Assertions.assertTrue(t.isFinGame());
 
 	}

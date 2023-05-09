@@ -15,7 +15,7 @@ public class GameModifyThread extends Thread{
     public void run(){
         try {
             synchronized (player.getEndGame()){
-                if (!player.getEndGame().get()) player.moveBlock(movement);
+                if (player.isAlive()) player.moveBlock(movement);
             }
         } catch (Exception ex) { ex.printStackTrace();}
 

@@ -36,6 +36,7 @@ public class RebordeBombTest {
         BloqueTetris bloque = null;
         for (int i = 0; i < repeticiones; i++) {
             bloques.add(BloqueTetris.selectRandomBlock(t.getBg(), new RebordeBomb()));
+            bloques.add(BloqueTetris.selectRandomBlock(t.getBg(), new RebordeBomb()));
             while (t.moveBlock("DOWN")){
                 bloque = t.getBlock().Clone();
             }
