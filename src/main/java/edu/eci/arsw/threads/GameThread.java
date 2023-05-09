@@ -68,7 +68,7 @@ public class GameThread extends Thread{
         Player player;
 
         for (int i = 0; i < lobby.getPlayers().size(); i++) {
-             player = lobby.getPlayers().get(i);
+            player = lobby.getPlayers().get(i);
             tableros.add(new Tablero(true, lobby.getVelocity(), player.getColorTablero(),
                     lobby.getFilas(), lobby.getCols(), bloques, b, tableros));
             player.setTablero(tableros.get(i));
@@ -91,35 +91,8 @@ public class GameThread extends Thread{
     private TimerTask instanceBuffosTask(){
         return new TimerTask() {
             public void run() {
-                int iteraciones = 0;
-                this.instanceBuffo(iteraciones);
-            }
-
-            private void instanceBuffo(int iteraciones){
-                int[] c = {3,2};
-                //int[] c = this.getCoord();
-                //if (this.isEmptyCoord(c) || iteraciones >= 10) 
-                b.set(BuffoFactory.getRandomBuffo());
-            }
-
-            private int[] getCoord(){
-                return new int[]{(int) (Math.random()*lobby.getFilas()), (int) (Math.random()*lobby.getCols())};
-            }
-
-            private boolean isEmptyCoord(int[] coord) {
-                boolean isEmpty = true;
-                int i = 0;
-                while (i < players.size()){
-                    PlayerThread p = players.get(i);
-                    synchronized (p.getEndGame()){
-                        if (p.isEmptyCoord(coord)) {
-                            isEmpty = false;
-                            break;
-                        }
-                    }
-                    i++;
-                }
-                return isEmpty;
+                int[] c = new int[]{(int) (Math.random()*lobby.getFilas()), (int) (Math.random()*lobby.getCols())};
+                b.set(BuffoFactory.getRandomBuffo(c));
             }
         };
 

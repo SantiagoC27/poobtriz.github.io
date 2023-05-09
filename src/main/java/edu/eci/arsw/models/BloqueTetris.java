@@ -12,7 +12,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	//C, L, LINE, T, Z
 	public static int[][][] formas ={{{1,1}, {1,1}}, {{1,0}, {1,0}, {1,1}}, {{1,1,1,1}},
 									{{1,1,1}, {0,1,0}}, {{1,1,0}, {0,1,1}} };
-	public static String[] colores= {"magenta", "blue", "pink", "orange", "indigo"};
+	public static String[] colores= {"#D2691E", "#00FFFF", "#8FBC8F", "#E9967A", "#32CD32"};
 	private int[][] shape;
 	
 	private final String color;
@@ -30,11 +30,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 		this.color = color;
 		this.currentForm = cu;
 		crearRotaciones();
-	}
-
-
-	public int getForm() {
-		return currentForm;
 	}
 
 	/**
@@ -58,20 +53,15 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public void moveRight() {
 		x++;
 	}
-	
+
 	public void setPos(int X,int Y) {
 		x = X;
 		y = Y;
 	}
-	
+
 	public int getCurrentRot() {
 		 if(currentRotation == 0) return 3;
 		return currentRotation-1;
-	}
-	
-	public int getNextRot() {
-		 if(currentRotation > 3) return 0;
-		return currentRotation;
 	}
 	
 	public int[][] getRotation(int pos) {
@@ -83,7 +73,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 		shape = formas[index];
 		crearRotaciones();
 		currentRotation = rotacion;
-		setShape();
+		rotar();
 	}
 
 	 /**
@@ -107,25 +97,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 		}
 		currentRotation++;
 		
-	}
-	
-	 /**
-	 * Usa alguna de las rotaciones disponibles de la ficha
-	 */
-	public void rotar(Tablero t) {
-		if(isRotable(t)) {
-			setShape();
-		}
-	}
-
-	 /**
-	 * Valida si la ficha se peude rotar correctamente con respecto al tablero y a otras fichas
-	 */
-	private boolean isRotable(Tablero t) {
-		int aux;
-		if(currentRotation > 3) aux = 0; else aux = currentRotation; 
-		int[][] next = rotaciones[aux];
-		return x + next[0].length <= t.background[0].length && y + next.length < t.background.length;
 	}
 	
 	public BloqueTetris Clone(){
@@ -198,7 +169,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 		return new BloqueTetris(formas[n],r, colores[n], n);
 	}
 	
-	private void setShape() {
+	public void rotar() {
 		if(currentRotation > 3) currentRotation = 0;
 		shape = rotaciones[currentRotation];
 		currentRotation++;

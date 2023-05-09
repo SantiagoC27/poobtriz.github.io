@@ -14,8 +14,11 @@ public class BuffoLessScore extends Buffo{
 
     @Setter
     private int delay = 10000;
+
+    private final Timer timer;
     public BuffoLessScore(int[] c){
         super(c, "lessScore");
+        timer = new Timer();
     }
 
     @Override
@@ -26,7 +29,6 @@ public class BuffoLessScore extends Buffo{
         t.getSumPuntuacion().set(puntuacion/2);
     }
 
-    final Timer timer = new Timer();
     TimerTask resetAddPuntuacion = new TimerTask() {
         public void run() {
             for (Tablero t: othersTableros) {

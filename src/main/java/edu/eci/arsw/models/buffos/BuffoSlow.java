@@ -14,7 +14,7 @@ public class BuffoSlow extends Buffo{
 	@Setter
 	private int delay = 10000;
 
-	final Timer timer;
+	private final Timer timer;
 
 	public BuffoSlow(int[] c) {
 		super(c, "slow");
