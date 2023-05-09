@@ -20,7 +20,6 @@ public class TableroTest {
 	int filas = 20;
 	int cols = 10;
 	List<Tablero> tableros = new ArrayList<>();
-
 	CommonBuffo b = new CommonBuffo();
 
 	@BeforeEach
@@ -98,8 +97,21 @@ public class TableroTest {
 
 
 	@Test
-	public void testRotarBlock() {
-		// TODO Terminar
+	public void testRotarBlockL() {
+		List<BloqueTetris>bloques = new ArrayList<>();
+		t = new Tablero(true, 1000, "yellow", 5, 8, bloques, b, tableros);
+		bloques.add(new BloqueTetris(BloqueTetris.formas[1], null, BloqueTetris.colores[1], 0));
+		t.spawnBlock();
+		t.getBlock().setPos(6,0);
+
+		assertFalse(t.rotarBlock());
+
+		t.getBlock().setPos(5,0);
+		for (int i = 0; i < 4; i++) {
+			assertTrue(t.rotarBlock());
+		}
+
+
 	}
 
 	@Test
@@ -133,9 +145,10 @@ public class TableroTest {
 
 	@Test
 	public void shouldActivateBuffo() throws TetrisException {
-		int[] position = new int[]{5,2};
+		int[] position = new int[]{4,2};
 		Buffo b = BuffoFactory.getRandomBuffo(position);
 		t.setBuffo(b);
+		t.getBlock().setPos(position[0], 0);
 		for (int i = 0; i < position[1]; i++) {
 			t.moveBlock("DOWN");
 			assertNotNull(b);

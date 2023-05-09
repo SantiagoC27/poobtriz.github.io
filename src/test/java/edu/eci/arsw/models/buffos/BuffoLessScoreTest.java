@@ -1,5 +1,6 @@
 package edu.eci.arsw.models.buffos;
 
+import edu.eci.arsw.models.BloqueTetris;
 import edu.eci.arsw.models.Tablero;
 import edu.eci.arsw.shared.TetrisException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +22,11 @@ public class BuffoLessScoreTest{
 
     @BeforeEach
     public void genTablero(){
-        tableros.add(new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros));
-        tableros.add(new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros));
-        tableros.add(new Tablero(true, 1000, "yellow", filas, cols, new ArrayList<>(), b, tableros));
+        List<BloqueTetris> bloques = new ArrayList<>();
+        bloques.add(new BloqueTetris(BloqueTetris.formas[1], null, BloqueTetris.colores[1], 0));
+        tableros.add(new Tablero(true, 1000, "yellow", filas, cols, bloques, b, tableros));
+        tableros.add(new Tablero(true, 1000, "yellow", filas, cols, bloques, b, tableros));
+        tableros.add(new Tablero(true, 1000, "yellow", filas, cols, bloques, b, tableros));
         for (Tablero t : tableros) {
                 t.spawnBlock();
         }
@@ -40,11 +43,13 @@ public class BuffoLessScoreTest{
             assertEquals(tableros.get(i).getSumPuntuacion().get(), tableros.get(i - 1).getSumPuntuacion().get());
         }
         assertNotEquals(tableros.get(0).getSumPuntuacion().get(), tableros.get(1).getSumPuntuacion().get());
-        Thread.sleep(buff.getDelay()+10);
-
-        for (int i = 1; i < tableros.size(); i++) {
-            assertEquals(tableros.get(i).getSumPuntuacion().get(), tableros.get(i - 1).getSumPuntuacion().get());
+        synchronized (buff.getTimer()) {
+            buff.getTimer().wait();
+            for (int i = 1; i < tableros.size(); i++) {
+                assertEquals(tableros.get(i).getSumPuntuacion().get(), tableros.get(i - 1).getSumPuntuacion().get());
+            }
         }
+
 
 
 

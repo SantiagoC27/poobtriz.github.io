@@ -55,7 +55,7 @@ public class Tablero implements Serializable{
 	public Tablero(){
 		buffo = new CommonBuffo();
 		this.bloques = new ArrayList<>();
-		this.bg = "yellow";
+		this.bg = "#F0F8FF";
 		Tablero.uniforme = true;
 		velocidad = 1000;
 		this.background = new String[15][10];
@@ -128,7 +128,7 @@ public class Tablero implements Serializable{
 		if (!Colision(1, 0, block)){
 			haBajado = true;
 			block.moveDown();
-			validateBuffo(0,1);
+			validateBuffo();
 		}
 
 		return haBajado;
@@ -176,8 +176,8 @@ public class Tablero implements Serializable{
 	private boolean moveBlockRight() throws TetrisException{
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
 		if(block.getX() + block.getWidth() < background[0].length && !Colision(0,1, this.block)){
-			validateBuffo(1,0);
 			block.moveRight();
+			validateBuffo();
 			return true;
 		}
 		return false;
@@ -198,6 +198,15 @@ public class Tablero implements Serializable{
 			switch (movement.toUpperCase()){
 				case "DOWN":
 					moved = moveBlockDown();
+					if (!moved) {
+						moveBlockToBackground();
+						if(block.borrarCercanos()) borrarCercanos();
+						else if(block.modifyShape()) setBlockToIdealForm();
+						block = null;
+						calculatePuntuacion();
+						bloquesUsados++;
+						calculateFinGame();
+					}
 					break;
 				case "UP":
 					moved = rotarBlock();
@@ -209,16 +218,7 @@ public class Tablero implements Serializable{
 					moved = moveBlockRight();
 					break;
 			}
-
 			moveBlockToBackground();
-			if (!moved) {
-				if(block.borrarCercanos()) borrarCercanos();
-				else if(block.modifyShape()) setBlockToIdealForm();
-				block = null;
-				calculatePuntuacion();
-				bloquesUsados++;
-				calculateFinGame();
-			}
 		}
 
 		return moved;
@@ -235,8 +235,8 @@ public class Tablero implements Serializable{
 	private boolean moveBlockLeft() throws TetrisException {
 		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
 		if(block.getX() -1 >= 0 && !Colision(0,-1, this.block)){
-			validateBuffo(-1,0);
 			block.moveLeft();
+			validateBuffo();
 			return true;
 		}
 		return false;
@@ -329,33 +329,27 @@ public class Tablero implements Serializable{
 	/**
 	 * Se encarga de rotar la ficha 
 	 */
-	public boolean rotarBlock() throws TetrisException {
-
-		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
+	public boolean rotarBlock() {
 		if(isRotable()) {
-			block.rotar(this);
-			validateBuffo(0,0);
+			block.rotar();
+			validateBuffo();
 			return true;
 		}
 		return false;
 	} 
 	/**
-	 * Valida que el tetromino se pueda rotar
-	 * @return si es rotable 
+	 * Valida que el tetromino se pueda rotar simulando la rotación. el bloque debe ser removido del background
+	 * @return si es rotable
 	 */
 
 	private boolean isRotable() {
-		// Traer la siguiente rotacion
-		// ver si no hay cuadros ocupados en el tablero
 		BloqueTetris b = block.Clone();
-		b.rotar(this);
-		int oldPos = b.getY();
+		b.rotar();
 		for(int[] c :b.getCoordenadas()) {
-			if (c[1] < 0) continue;
-			if(oldPos == b.getY() && !Objects.equals(background[c[1]][c[0]], bg)) return false;
-			if(oldPos != b.getY() && !Objects.equals(background[c[1] + 1][c[0]], bg)) return false;
+			if (c[1] < 0 || c[1] >= background.length || c[0] < 0 || c[0] >= background[0].length
+			|| !Objects.equals(background[c[1]][c[0]], bg)) return false;
 		}
-	
+
 		return true;
 	}
 
@@ -417,11 +411,11 @@ public class Tablero implements Serializable{
 	 /**
 	 * Si el bloque está sobre la posición, lo activa
 	 */
-	public void validateBuffo(int x, int y) {
+	public void validateBuffo() {
 		if(buffo.get() != null) {
 			synchronized (buffo.get()){
 				for(int[] c :block.getCoordenadas()) {
-					if(c[1]+y == buffo.getY() && c[0] == buffo.getX()+x) {
+					if(c[1] == buffo.getY() && c[0] == buffo.getX()) {
 						System.out.println(this.Id + " activa el buffo");
 						buffo.activate(tableros, this.Id);
 						buffo.set(null);
