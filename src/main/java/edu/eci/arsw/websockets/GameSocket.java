@@ -50,7 +50,7 @@ public class GameSocket {
     @OnClose
     public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) {
         sessions.remove(username);
-        broadcast("User " + username + " left");
+        System.out.println("User " + username + " left");
     }
 
     @OnError
@@ -70,15 +70,5 @@ public class GameSocket {
             GameSession gs = gSessions.get(0);
             if (gs.isAlive()) gs.moveBlock(username, message);
         }
-    }
-
-    private void broadcast(String message) {
-        sessions.values().forEach(s -> {
-            s.getAsyncRemote().sendObject(message, result -> {
-                if (result.getException() != null) {
-                    System.out.println("Unable to send message: " + result.getException());
-                }
-            });
-        });
     }
 }

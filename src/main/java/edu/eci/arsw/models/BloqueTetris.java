@@ -6,6 +6,7 @@ import java.util.*;
 import edu.eci.arsw.shared.Log;
 import edu.eci.arsw.models.rebordes.Reborde;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public class BloqueTetris implements Cloneable, Serializable {
@@ -20,16 +21,19 @@ public class BloqueTetris implements Cloneable, Serializable {
 	protected int[][][] rotaciones;
 	private int currentRotation;
 	private final Reborde reborde;
-	private boolean isMovible = true;
+
+	private int[][] coordenadas = new int[4][];
+	@Setter
+	private boolean isMobibleDown = true;
 	private final int currentForm;
-	
-	
+
 	public BloqueTetris(int[][] shape, Reborde r, String color, int cu) {
 		this.reborde = r;
 		this.shape = shape;
 		this.color = color;
 		this.currentForm = cu;
 		crearRotaciones();
+		calculateCoordenadas();
 	}
 
 	/**
@@ -39,24 +43,31 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public void spawn(int girdWidth) {
 		y = -getHeight();
 		x = girdWidth / 2;
+		calculateCoordenadas();
 	}
 
 	
 	public void moveDown() {
-		if(isMovible ) y++;
+		if(isMobibleDown) {
+			y++;
+			calculateCoordenadas();
+		}
 	}
 	
 	public void moveLeft() {
 		x--;
+		calculateCoordenadas();
 	}
 	
 	public void moveRight() {
 		x++;
+		calculateCoordenadas();
 	}
 
 	public void setPos(int X,int Y) {
 		x = X;
 		y = Y;
+		calculateCoordenadas();
 	}
 
 	public int getCurrentRot() {
@@ -114,22 +125,20 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 
 	 /**
-	 * Retorna las coordenas en las que se encuentra la ficha de la forma x,y. Excluye coordenadas negativas
-	 * @return las coordenadas
+	 * Calcula las coordenas en las que se encuentra la ficha de la forma x,y
 	 */
-	public int[][] getCoordenadas() {
+	public void calculateCoordenadas() {
 		int cont = 0;
-		int[][] posiciones = new int[4][];
+		coordenadas = new int[4][];
 
 		for(int r = 0; r < getHeight(); r++) {
 			for(int c = 0; c < getWidth(); c++) {
 				if(shape[r][c] == 1) {
-					posiciones[cont] = new int[]{c + x, r + y};
+					coordenadas[cont] = new int[]{c + x, r + y};
 					cont++;
 				}
 			}
 		}
-		return posiciones;
 	}
 
 	 /**
@@ -138,7 +147,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 */
 	 public List<int[]> getCoordenadasCercanas() {
 		 List<int[]> posiciones = new ArrayList<>();
-		 for(int[] c :this.getCoordenadas()) {
+		 for(int[] c : coordenadas) {
 			 if (HasNotCoord(c[0] - 1, c[1], posiciones))  posiciones.add(new int[]{c[0]-1, c[1]});
 			 if (HasNotCoord(c[0] + 1, c[1], posiciones ))  posiciones.add(new int[]{c[0]+1, c[1]});
 			 if (HasNotCoord(c[0], c[1]+1, posiciones))  posiciones.add(new int[]{c[0], c[1]+1 });
@@ -155,7 +164,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 * Verifica que la coordenada x e y no esté en la lista indicada, y tampoco sea parte de las coordenadas del bloque
 	 */
 	 private boolean HasNotCoord(int x, int y, List<int[]> positions){
-		 return Arrays.stream(getCoordenadas()).noneMatch(c -> c[0] == x && c[1] == y) &&
+		 return Arrays.stream(coordenadas).noneMatch(c -> c[0] == x && c[1] == y) &&
 				 positions.stream().noneMatch(co -> co[0] == x && co[1] == y);
 	 }
 
@@ -173,6 +182,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 		if(currentRotation > 3) currentRotation = 0;
 		shape = rotaciones[currentRotation];
 		currentRotation++;
+		calculateCoordenadas();
 	}
 
 
@@ -181,6 +191,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 * @return La posición en Y de la pieza desde su posición superior izquierda
 	 */
 	public int getHeight() {
+		if (shape == null) return 0;
 		return shape.length;
 	}
 
@@ -188,6 +199,7 @@ public class BloqueTetris implements Cloneable, Serializable {
 	 * @return La posición en X de la pieza desde su posición superior izquierda
 	 */
 	public int 	getWidth() {
+		if (shape == null) return 0;
 		return shape[0].length;
 	}
 
@@ -195,12 +207,6 @@ public class BloqueTetris implements Cloneable, Serializable {
 	public boolean modifyShape() {
 		return reborde.modifyShape();
 	}
-
-
-	public void setMovilidad(boolean p) {
-		this.isMovible = p;
-	}
-
 
 	public int countCuadrosFila(int pos) {
 		int cont = 0;
@@ -222,6 +228,19 @@ public class BloqueTetris implements Cloneable, Serializable {
 
 	public int[][][] getRotaciones() {
 		return this.rotaciones;
+	}
+
+	@Override
+	public String toString() {
+		return "{" +
+				"\"color\": \"" + color + "\"" +
+				", \"reborde\":" + reborde.toString() +
+				", \"coordenadas\":" + Arrays.deepToString(coordenadas) +
+				", \"x\":" + x +
+				", \"y\":" + y +
+				", \"height\":" + getHeight() +
+				", \"width\":" + getWidth() +
+				"}";
 	}
 }
 

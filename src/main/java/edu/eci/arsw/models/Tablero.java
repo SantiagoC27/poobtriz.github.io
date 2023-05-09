@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.eci.arsw.models.buffos.Buffo;
@@ -30,7 +29,9 @@ public class Tablero implements Serializable{
 	public Reborde[][] bgReborde;
 	private int bloquesUsados = 0;
 	private BloqueTetris block = null;
+	private BloqueTetris nextPiece = null;
 	private int velocidad;
+
 	private static final int disminucionVel = 100;
 	private static boolean uniforme = true;
 
@@ -70,51 +71,24 @@ public class Tablero implements Serializable{
 	 */
 	private void llenarMatriz() {
 		for(int r = 0; r < background.length; r++) {
-			for(int c = 0; c < background[0].length; c++) {
+			for (int c = 0; c < background[0].length; c++) {
 				background[r][c] = bg;
-				}
 			}
-		
-	}
-
-
-	/**
-	 * Genera una coordenada aleatoria para el buffo
-	 * @return La coordenada
-	 */
-	private int[] crearCoordenada() {
-		Random random = new Random();
-		int[] coord = new int[2];
-		int n =  random.nextInt(background.length-1);
-		if(tableros.size() == 1) {
-			int[] coords =tableros.get(0).getCoordenadasLibres(n);
-			coord[0] = coords[random.nextInt(background[0].length-1)];
-			coord[1] = n;
-		}else {
-			try {
-				for(int c :tableros.get(0).getCoordenadasLibres(n)) {
-					for(int c2 :tableros.get(1).getCoordenadasLibres(n)) {
-						if(c == c2) {
-							coord[0] = c;
-							coord[1] = n;
-							break;
-						}
-					}
-				}				
-			}catch(Exception e) {return null;}
-
 		}
-		return coord;
 	}
-
 	
 	
 	/**
-	 * Genera un tetromino aleatorio con color distinto al del fondo del tablero.
+	 * Genera 2 tetrominos aleatorio con color distinto al del fondo del tablero.
 	 */
 	public void spawnBlock() {
-		if(bloquesUsados >= bloques.size()) bloques.add(BloqueTetris.selectRandomBlock(bg, null));
+		if(bloquesUsados +1 >= bloques.size()) {
+			bloques.add(BloqueTetris.selectRandomBlock(bg, null));
+			bloques.add(BloqueTetris.selectRandomBlock(bg, null));
+		}
 		block = bloques.get(bloquesUsados).Clone();
+		nextPiece = bloques.get(bloquesUsados+1).Clone();
+		nextPiece.setPos(0,0);
 		block.spawn(background[0].length);
 	}
 
@@ -128,7 +102,6 @@ public class Tablero implements Serializable{
 		if (!Colision(1, 0, block)){
 			haBajado = true;
 			block.moveDown();
-			validateBuffo();
 		}
 
 		return haBajado;
@@ -173,11 +146,9 @@ public class Tablero implements Serializable{
 	 * Mueve el bloque a la derecha si es posible
 	 *
 	 */
-	private boolean moveBlockRight() throws TetrisException{
-		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
+	private boolean moveBlockRight(){
 		if(block.getX() + block.getWidth() < background[0].length && !Colision(0,1, this.block)){
 			block.moveRight();
-			validateBuffo();
 			return true;
 		}
 		return false;
@@ -186,7 +157,7 @@ public class Tablero implements Serializable{
 
 	/**
 	 * Mueve el bloque y recalcula la puntuación
-	 * @param movement dirección del movimiento. ['UP', 'DOWN', 'LEFT', 'RIGHT']
+	 * @param movement Dirección del movimiento. ['UP', 'DOWN', 'LEFT', 'RIGHT']
 	 * @return Si se movió el bloque o no
 	 * @throws TetrisException si el bloque es nulo
 	 */
@@ -218,6 +189,7 @@ public class Tablero implements Serializable{
 					moved = moveBlockRight();
 					break;
 			}
+			validateBuffo();
 			moveBlockToBackground();
 		}
 
@@ -232,11 +204,9 @@ public class Tablero implements Serializable{
 	/**
 	 * Mueve el bloque a la izquierda si es posible
 	 */
-	private boolean moveBlockLeft() throws TetrisException {
-		if (block == null) throw new TetrisException(TetrisException.BLOCK_NULL);
+	private boolean moveBlockLeft() {
 		if(block.getX() -1 >= 0 && !Colision(0,-1, this.block)){
 			block.moveLeft();
-			validateBuffo();
 			return true;
 		}
 		return false;
@@ -332,7 +302,6 @@ public class Tablero implements Serializable{
 	public boolean rotarBlock() {
 		if(isRotable()) {
 			block.rotar();
-			validateBuffo();
 			return true;
 		}
 		return false;
@@ -412,7 +381,7 @@ public class Tablero implements Serializable{
 	 * Si el bloque está sobre la posición, lo activa
 	 */
 	public void validateBuffo() {
-		if(buffo.get() != null) {
+		if(buffo.get() != null && block != null) {
 			synchronized (buffo.get()){
 				for(int[] c :block.getCoordenadas()) {
 					if(c[1] == buffo.getY() && c[0] == buffo.getX()) {
@@ -426,7 +395,7 @@ public class Tablero implements Serializable{
 		}
 	}
 	public void setMovilidadBlock(boolean p) {
-		if(block != null) block.setMovilidad(p);
+		if(block != null) block.setMobibleDown(p);
 	}
 
 
@@ -586,6 +555,7 @@ public class Tablero implements Serializable{
 		}
 		sRta.append("]");
 		if (buffo.get() != null) sRta.append(", \"buffo\": ").append(buffo.get().toString());
+		if (nextPiece != null) sRta.append(", \"nextPiece\": ").append(nextPiece.toString());
 		sRta.append(String.format(",\"puntuacion\": %d", puntuacion));
 		sRta.append("}");
 		return sRta.toString();
