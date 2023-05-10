@@ -41,7 +41,8 @@ public class LobbySocket {
 
     @OnClose
     public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) throws IOException, TetrisException {
-        SessionService.closeSessions(lobbyService.get(codigo), sessions);
+        if (lobbyService.isAdmin(username, codigo))
+            SessionService.closeSessions(lobbyService.get(codigo), sessions);
     }
 
     @OnError
