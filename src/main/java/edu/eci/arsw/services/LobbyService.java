@@ -38,4 +38,11 @@ public class LobbyService {
     public void create(Lobby lobby) {
         this.lobbyDAO.create(lobby);
     }
+
+    public boolean isAdmin(String username, int codigo) {
+        try{
+            return this.lobbyDAO.get(codigo).getAdmin().getNick().equals(username);
+        }catch (Exception ex){ ex.printStackTrace();}
+        return false;
+    }
 }

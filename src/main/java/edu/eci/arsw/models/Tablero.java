@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edu.eci.arsw.models.buffos.Buffo;
 import edu.eci.arsw.models.buffos.CommonBuffo;
 import edu.eci.arsw.models.rebordes.Reborde;
@@ -20,6 +21,7 @@ public class Tablero implements Serializable{
 
 	private final int Id;
 	private final CommonBuffo buffo;
+	@JsonIgnore
 	private final List<Tablero> tableros;
 	private final List<BloqueTetris> bloques;
 
@@ -526,6 +528,7 @@ public class Tablero implements Serializable{
 		}
 		return puntuacion;
 	}
+
 
 	private int areEquals(int[] arr, int[] arr2, int suma) {
 		int cont = 0;

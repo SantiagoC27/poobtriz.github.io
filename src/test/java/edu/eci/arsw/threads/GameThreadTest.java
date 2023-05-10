@@ -27,10 +27,24 @@ public class GameThreadTest  {
     }
 
     @Test
-    public void shouldEnd() throws InterruptedException {
-        //Validar 2 players
+    public void shouldEnd2Players() throws InterruptedException {
         Player player = new Player("player");
         lobby.addPlayer(player);
+        gt.start();
+        while(!playersMoved.get()){
+            synchronized (playersMoved){
+                playersMoved.wait();
+            }
+        }
+        long start1 = System.currentTimeMillis();
+        gt.join();
+        long end1 = System.currentTimeMillis();
+        System.out.println(end1-start1);
+        assertTrue(end1-start1 < 500);
+    }
+
+    @Test
+    public void shouldEnd() throws InterruptedException {
         gt.start();
         while(!playersMoved.get()){
             synchronized (playersMoved){

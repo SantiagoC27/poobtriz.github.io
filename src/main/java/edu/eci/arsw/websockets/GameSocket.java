@@ -50,7 +50,6 @@ public class GameSocket {
     @OnClose
     public void onClose(Session session, @PathParam("username") String username, @PathParam("codigo") int codigo) {
         sessions.remove(username);
-        System.out.println("User " + username + " left");
     }
 
     @OnError

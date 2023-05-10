@@ -57,6 +57,9 @@ public class GameThread extends Thread{
         genBuffo.cancel();
         timer.cancel();
         lobby.setEstado(Estado.FINISHED);
+        synchronized (playerMoved){
+            playerMoved.notify();
+        }
     }
 
     /**
