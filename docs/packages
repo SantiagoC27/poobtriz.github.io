@@ -1,0 +1,14 @@
+edu.eci.arsw
+edu.eci.arsw.models.adapters
+edu.eci.arsw.models
+edu.eci.arsw.models.buffos
+edu.eci.arsw.models.buffos.factories
+edu.eci.arsw.models.player
+edu.eci.arsw.models.rebordes
+edu.eci.arsw.persistence.impl
+edu.eci.arsw.persistence.lobby
+edu.eci.arsw.persistence
+edu.eci.arsw.services
+edu.eci.arsw.shared
+edu.eci.arsw.threads
+edu.eci.arsw.websockets

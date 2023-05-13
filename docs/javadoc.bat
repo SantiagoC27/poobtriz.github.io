@@ -1,0 +1,1 @@
+cmd.exe /X /C "C:\Users\USER\AppData\Local\Programs\AdoptOpenJDK\jdk-11.0.10.9-hotspot\bin\javadoc.exe @options @packages"
